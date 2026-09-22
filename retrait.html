@@ -1,0 +1,1066 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>OSMO — Retrait</title>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(111, 0, 255, .22), transparent 38%),
+        #050505;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      width: min(94%, 560px);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(146, 67, 255, .35);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-subtitle {
+      color: #85858e;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .hero {
+      margin: 10px 0 20px;
+    }
+
+    .hero h1 {
+      font-size: 27px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      color: #91919a;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 15px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 15px;
+    }
+
+    .card-title i {
+      color: #9c4dff;
+    }
+
+    .balance-card {
+      background:
+        linear-gradient(145deg, rgba(92,25,165,.19), rgba(10,10,12,.98));
+      border-color: rgba(143,66,255,.25);
+    }
+
+    .balance-label {
+      color: #8b8b95;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 600;
+    }
+
+    .balance-value {
+      margin-top: 6px;
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .account-card {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .account-icon {
+      flex: 0 0 46px;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(143,66,255,.10);
+      border: 1px solid rgba(143,66,255,.2);
+      color: #ad63ff;
+      font-size: 17px;
+    }
+
+    .account-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .account-label {
+      color: #7f7f89;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .account-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .account-phone {
+      color: #aaaab3;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .operator {
+      color: #c383ff;
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 3px;
+    }
+
+    .account-link {
+      color: #a95bff;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      color: #d4d4da;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap > i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777781;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      height: 50px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+      color: #fff;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    input[type="number"] {
+      padding: 0 14px 0 42px;
+    }
+
+    input[type="password"] {
+      padding: 0 45px 0 42px;
+    }
+
+    input:focus {
+      border-color: rgba(155,74,255,.65);
+      box-shadow: 0 0 0 3px rgba(129,40,255,.08);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 0;
+      background: transparent;
+      color: #777781;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .withdraw-summary {
+      border-radius: 15px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.06);
+      overflow: hidden;
+      margin: 3px 0 17px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 13px;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .summary-row:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-label {
+      color: #85858f;
+      font-size: 10px;
+    }
+
+    .summary-value {
+      font-size: 11px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .summary-value.fee {
+      color: #ff9aa8;
+    }
+
+    .summary-value.net {
+      color: #6fe0ad;
+      font-size: 13px;
+    }
+
+    .hours {
+      padding: 12px 13px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      background: rgba(143,66,255,.06);
+      border: 1px solid rgba(143,66,255,.12);
+      color: #9d9da7;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .hours strong {
+      color: #c083ff;
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg,#7b20e8,#a347ff);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(115,28,222,.22);
+    }
+
+    .submit-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      padding: 13px;
+      margin-bottom: 15px;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(220,40,70,.09);
+      border: 1px solid rgba(220,40,70,.18);
+      color: #ff8b9a;
+    }
+
+    .message.success {
+      display: block;
+      background: rgba(20,190,120,.09);
+      border: 1px solid rgba(20,190,120,.18);
+      color: #70dfb0;
+    }
+
+    .no-account {
+      text-align: center;
+      padding: 24px 15px;
+    }
+
+    .no-account i {
+      color: #9e4dff;
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .no-account h3 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .no-account p {
+      color: #85858f;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .account-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 43px;
+      padding: 0 18px;
+      margin-top: 15px;
+      border-radius: 12px;
+      background: linear-gradient(135deg,#7b20e8,#a347ff);
+      color: #fff;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 28px 20px;
+    }
+
+    .success-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      color: #55dda5;
+      background: rgba(25,190,116,.1);
+      border: 1px solid rgba(25,190,116,.2);
+      font-size: 22px;
+    }
+
+    .success-card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .success-card p {
+      color: #92929b;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .history-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 43px;
+      padding: 0 18px;
+      margin-top: 17px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      height: 74px;
+      background: rgba(7,7,8,.95);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(560px,100%);
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+    }
+
+    .nav-item {
+      color: #6f6f79;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a657ff;
+    }
+  </style></head><body><div class="container">  <header>
+    <a href="dashboard.html" class="back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a><img src="logo.png" class="logo" alt="OSMO">
+
+<div>
+  <div class="header-title">OSMO</div>
+  <div class="header-subtitle">Retrait</div>
+</div>
+
+  </header>  <section class="hero">
+    <h1>Effectuer un retrait</h1>
+    <p>
+      Demandez un retrait vers votre compte de retrait enregistré.
+      Le traitement est effectué après vérification.
+    </p>
+  </section>  <div id="message" class="message"></div>  <section class="card balance-card">
+    <div class="balance-label">Solde disponible</div>
+    <div class="balance-value" id="balance">—</div>
+  </section>  <section class="card" id="accountSection"><div class="card-title">
+  <i class="fa-solid fa-wallet"></i>
+  Compte de retrait
+</div>
+
+<div id="accountContent"></div>
+
+  </section>  <section class="card" id="formCard"><div class="card-title">
+  <i class="fa-solid fa-arrow-up-right-dots"></i>
+  Nouvelle demande
+</div>
+
+<form id="withdrawForm">
+
+  <div class="field">
+    <label for="amount">Montant du retrait</label>
+
+    <div class="input-wrap">
+      <i class="fa-solid fa-coins"></i>
+
+      <input
+        id="amount"
+        type="number"
+        min="1200"
+        step="1"
+        placeholder="Montant en XOF"
+        required
+      >
+    </div>
+  </div>
+
+  <div class="withdraw-summary">
+
+    <div class="summary-row">
+      <span class="summary-label">Montant demandé</span>
+      <span class="summary-value" id="summaryAmount">0 XOF</span>
+    </div>
+
+    <div class="summary-row">
+      <span class="summary-label">Frais de retrait</span>
+      <span class="summary-value fee" id="summaryFee">0 XOF</span>
+    </div>
+
+    <div class="summary-row">
+      <span class="summary-label">Montant net</span>
+      <span class="summary-value net" id="summaryNet">0 XOF</span>
+    </div>
+
+  </div>
+
+  <div class="hours">
+    <i class="fa-regular fa-clock"></i>
+    Les retraits sont disponibles de
+    <strong id="withdrawHours">08:00 à 18:00</strong>.
+  </div>
+
+  <div class="field">
+    <label for="transactionPassword">
+      Mot de passe de transaction
+    </label>
+
+    <div class="input-wrap">
+
+      <i class="fa-solid fa-lock"></i>
+
+      <input
+        id="transactionPassword"
+        type="password"
+        placeholder="Votre mot de passe de transaction"
+        required
+      >
+
+      <button
+        type="button"
+        class="toggle-password"
+        id="togglePassword"
+      >
+        <i class="fa-solid fa-eye"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <button
+    id="submitBtn"
+    type="submit"
+    class="submit-btn"
+  >
+    <i class="fa-solid fa-paper-plane"></i>
+    &nbsp; ENVOYER LA DEMANDE
+  </button>
+
+</form>
+
+  </section>  <section class="card success-card" id="successCard"><div class="success-icon">
+  <i class="fa-solid fa-check"></i>
+</div>
+
+<h2>Demande envoyée</h2>
+
+<p>
+  Votre demande de retrait a bien été enregistrée.
+  Elle sera traitée selon les règles de retrait de la plateforme.
+</p>
+
+<a href="mes-retraits.html" class="history-btn">
+  Voir mes retraits
+</a>
+
+  </section></div><nav class="bottom-nav">  <div class="nav-inner"><a href="dashboard.html" class="nav-item">
+  <i class="fa-solid fa-house"></i>
+  <span>ACCUEIL</span>
+</a>
+
+<a href="produits.html" class="nav-item">
+  <i class="fa-solid fa-chart-line"></i>
+  <span>PRODUIT</span>
+</a>
+
+<a href="equipe.html" class="nav-item">
+  <i class="fa-solid fa-users"></i>
+  <span>ÉQUIPE</span>
+</a>
+
+<a href="compte.html" class="nav-item">
+  <i class="fa-solid fa-user"></i>
+  <span>PROFIL</span>
+</a>
+
+  </div></nav><script>
+  const SUPABASE_URL =
+    "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const sessionToken =
+    localStorage.getItem("osmo_session_token");
+
+  if (!sessionToken) {
+    window.location.href = "connexion.html";
+  }
+
+  let minWithdrawal = 1200;
+  let feePercent = 15;
+  let withdrawalsStart = "08:00";
+  let withdrawalsEnd = "18:00";
+  let currentBalance = 0;
+  let withdrawalAccount = null;
+
+  const message =
+    document.getElementById("message");
+
+  const amountInput =
+    document.getElementById("amount");
+
+  const submitBtn =
+    document.getElementById("submitBtn");
+
+  function showMessage(text, type = "error") {
+    message.textContent = text;
+    message.className = "message " + type;
+    message.style.display = "block";
+  }
+
+  function hideMessage() {
+    message.style.display = "none";
+  }
+
+  function formatMoney(value) {
+    return Number(value || 0).toLocaleString("fr-FR") + " XOF";
+  }
+
+  function updateSummary() {
+
+    const amount =
+      Number(amountInput.value || 0);
+
+    const fee =
+      amount * feePercent / 100;
+
+    const net =
+      amount - fee;
+
+    document.getElementById("summaryAmount")
+      .textContent = formatMoney(amount);
+
+    document.getElementById("summaryFee")
+      .textContent = formatMoney(fee);
+
+    document.getElementById("summaryNet")
+      .textContent = formatMoney(net);
+  }
+
+  amountInput.addEventListener(
+    "input",
+    updateSummary
+  );
+
+  document
+    .getElementById("togglePassword")
+    .addEventListener("click", function () {
+
+      const input =
+        document.getElementById("transactionPassword");
+
+      const icon =
+        this.querySelector("i");
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.className = "fa-solid fa-eye-slash";
+      } else {
+        input.type = "password";
+        icon.className = "fa-solid fa-eye";
+      }
+
+    });
+
+  function isWithinWithdrawalHours() {
+
+    const now = new Date();
+
+    const currentMinutes =
+      now.getHours() * 60 +
+      now.getMinutes();
+
+    const startParts =
+      withdrawalsStart.split(":");
+
+    const endParts =
+      withdrawalsEnd.split(":");
+
+    const startMinutes =
+      Number(startParts[0]) * 60 +
+      Number(startParts[1]);
+
+    const endMinutes =
+      Number(endParts[0]) * 60 +
+      Number(endParts[1]);
+
+    return (
+      currentMinutes >= startMinutes &&
+      currentMinutes <= endMinutes
+    );
+  }
+
+  async function loadSettings() {
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        "public_settings"
+      );
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    if (!data) return;
+
+    minWithdrawal =
+      Number(data.min_withdrawal || 1200);
+
+    feePercent =
+      Number(data.withdrawal_fee_percent || 15);
+
+    withdrawalsStart =
+      data.withdrawals_start || "08:00";
+
+    withdrawalsEnd =
+      data.withdrawals_end || "18:00";
+
+    amountInput.min =
+      minWithdrawal;
+
+    amountInput.placeholder =
+      "Minimum " +
+      minWithdrawal.toLocaleString("fr-FR") +
+      " XOF";
+
+    document.getElementById("withdrawHours")
+      .textContent =
+      withdrawalsStart +
+      " à " +
+      withdrawalsEnd;
+
+    updateSummary();
+  }
+
+  async function loadAccount() {
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        "my_withdrawal_account",
+        {
+          p_session_token: sessionToken
+        }
+      );
+
+    if (error) {
+      console.error(error);
+      throw new Error(
+        "Impossible de charger votre compte de retrait."
+      );
+    }
+
+    withdrawalAccount = data;
+
+    const accountContent =
+      document.getElementById("accountContent");
+
+    if (!data) {
+
+      accountContent.innerHTML = `
+        <div class="no-account">
+          <i class="fa-solid fa-wallet"></i>
+
+          <h3>Aucun compte de retrait</h3>
+
+          <p>
+            Vous devez enregistrer votre compte WAVE
+            avant de pouvoir effectuer un retrait.
+          </p>
+
+          <a
+            href="compte-retrait.html"
+            class="account-btn"
+          >
+            CONFIGURER MON COMPTE
+          </a>
+        </div>
+      `;
+
+      document.getElementById("formCard")
+        .style.display = "none";
+
+      return;
+    }
+
+    accountContent.innerHTML = `
+      <div class="account-card">
+
+        <div class="account-icon">
+          <i class="fa-solid fa-mobile-screen-button"></i>
+        </div>
+
+        <div class="account-info">
+
+          <div class="account-label">
+            Bénéficiaire
+          </div>
+
+          <div class="account-name">
+            ${escapeHtml(
+              data.beneficiary_name || "—"
+            )}
+          </div>
+
+          <div class="account-phone">
+            ${escapeHtml(
+              data.account_phone || "—"
+            )}
+          </div>
+
+          <div class="operator">
+            ${escapeHtml(
+              data.operator || "WAVE"
+            )}
+          </div>
+
+        </div>
+
+        <a
+          href="compte-retrait.html"
+          class="account-link"
+        >
+          MODIFIER
+        </a>
+
+      </div>
+    `;
+  }
+
+  async function loadBalance() {
+
+    /*
+     * Le dashboard est la source officielle
+     * du solde utilisateur.
+     */
+    const { data, error } =
+      await supabaseClient.rpc(
+        "user_dashboard",
+        {
+          p_session_token: sessionToken
+        }
+      );
+
+    if (error) {
+      console.error(error);
+      throw new Error(
+        "Impossible de récupérer votre solde."
+      );
+    }
+
+    currentBalance =
+      Number(
+        data?.user?.balance || 0
+      );
+
+    document.getElementById("balance")
+      .textContent =
+      formatMoney(currentBalance);
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  async function initialize() {
+
+    try {
+
+      await Promise.all([
+        loadSettings(),
+        loadAccount(),
+        loadBalance()
+      ]);
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        error.message ||
+        "Impossible de charger les informations du retrait."
+      );
+    }
+  }
+
+  document
+    .getElementById("withdrawForm")
+    .addEventListener("submit", async function(event) {
+
+      event.preventDefault();
+
+      hideMessage();
+
+      const amount =
+        Number(amountInput.value);
+
+      const transactionPassword =
+        document
+          .getElementById("transactionPassword")
+          .value;
+
+      if (!withdrawalAccount) {
+       showMessage(
+          "Vous devez d'abord configurer votre compte de retrait."
+        );
+        return;
+      }
+
+      if (!amount || amount < minWithdrawal) {
+        showMessage(
+          "Le montant minimum de retrait est de " +
+          minWithdrawal.toLocaleString("fr-FR") +
+          " XOF."
+        );
+        return;
+      }
+
+      if (amount > currentBalance) {
+        showMessage(
+          "Votre solde disponible est insuffisant."
+        );
+        return;
+      }
+
+      if (!transactionPassword) {
+        showMessage(
+          "Veuillez saisir votre mot de passe de transaction."
+        );
+        return;
+      }
+
+      if (!isWithinWithdrawalHours()) {
+        showMessage(
+          "Les retraits sont disponibles de " +
+          withdrawalsStart +
+          " à " +
+          withdrawalsEnd +
+          "."
+        );
+        return;
+      }
+
+      submitBtn.disabled = true;
+
+      submitBtn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> TRAITEMENT...';
+
+      try {
+
+        const { data, error } =
+          await supabaseClient.rpc(
+            "withdraw_secure",
+            {
+              p_session_token: sessionToken,
+              p_amount: amount,
+              p_transaction_password:
+                transactionPassword
+            }
+          );
+
+        if (error) {
+          console.error(error);
+
+          throw new Error(
+            error.message ||
+            "Impossible d'enregistrer le retrait."
+          );
+        }
+
+        console.log(
+          "Retrait créé :",
+          data
+        );
+
+        document.getElementById("formCard")
+          .style.display = "none";
+
+        document.getElementById("successCard")
+          .style.display = "block";
+
+        showMessage(
+          "Votre demande de retrait a été enregistrée.",
+          "success"
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          error.message ||
+          "Une erreur est survenue."
+        );
+
+        submitBtn.disabled = false;
+
+        submitBtn.innerHTML =
+          '<i class="fa-solid fa-paper-plane"></i> &nbsp; ENVOYER LA DEMANDE';
+      }
+
+    });
+
+  initialize();
+</script>
+
+</body>
+</html>
