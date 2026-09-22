@@ -1,0 +1,850 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSMO — Dépôt</title>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(111, 0, 255, .22), transparent 38%),
+        #050505;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 95px;
+    }
+
+    .container {
+      width: min(94%, 560px);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .header-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(145, 63, 255, .35);
+      box-shadow: 0 0 22px rgba(124, 38, 255, .2);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-subtitle {
+      margin-top: 3px;
+      color: #8d8d96;
+      font-size: 12px;
+    }
+
+    .hero {
+      margin-top: 15px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      font-size: 27px;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .hero p {
+      color: #9999a3;
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: linear-gradient(
+        145deg,
+        rgba(22, 22, 25, .96),
+        rgba(11, 11, 13, .96)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 16px 45px rgba(0,0,0,.22);
+    }
+
+    .payment-card {
+      border-color: rgba(132, 53, 255, .28);
+      background:
+        linear-gradient(145deg, rgba(83, 22, 157, .17), rgba(10, 10, 13, .96));
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .card-title i {
+      color: #9b4dff;
+    }
+
+    .operator-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .operator-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #d7d7dc;
+    }
+
+    .payment-number {
+      margin-top: 7px;
+      font-size: 24px;
+      letter-spacing: 1px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .payment-note {
+      margin-top: 12px;
+      color: #97979f;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      flex: 0 0 27px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: rgba(133, 53, 255, .16);
+      border: 1px solid rgba(143, 66, 255, .28);
+      color: #ad69ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .step-text {
+      color: #a4a4ad;
+      font-size: 12px;
+      line-height: 1.6;
+      padding-top: 3px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      color: #d7d7dc;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777782;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    input[type="number"],
+    input[type="tel"],
+    input[type="file"] {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+      color: #fff;
+      border-radius: 13px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    input[type="number"],
+    input[type="tel"] {
+      height: 50px;
+      padding: 0 14px 0 42px;
+      font-size: 14px;
+    }
+
+    input:focus {
+      border-color: rgba(151, 72, 255, .65);
+      box-shadow: 0 0 0 3px rgba(129, 40, 255, .08);
+    }
+
+    .file-box {
+      border: 1px dashed rgba(148, 70, 255, .45);
+      border-radius: 15px;
+      padding: 17px;
+      background: rgba(118, 34, 255, .045);
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    input[type="file"]::file-selector-button {
+      border: 0;
+      border-radius: 9px;
+      padding: 9px 12px;
+      margin-right: 9px;
+      background: rgba(141, 55, 255, .18);
+      color: #c795ff;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .file-help {
+      margin-top: 9px;
+      color: #85858e;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .selected-file {
+      display: none;
+      margin-top: 9px;
+      color: #b978ff;
+      font-size: 11px;
+      word-break: break-word;
+    }
+
+    .submit-btn {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7b20e8, #a347ff);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(115, 28, 222, .22);
+      transition: .2s;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .message {
+      display: none;
+      border-radius: 13px;
+      padding: 13px;
+      margin-bottom: 15px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(220, 40, 70, .09);
+      border: 1px solid rgba(220, 40, 70, .2);
+      color: #ff8d9d;
+    }
+
+    .message.success {
+      display: block;
+      background: rgba(20, 190, 120, .09);
+      border: 1px solid rgba(20, 190, 120, .2);
+      color: #6de0af;
+    }
+
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 28px 20px;
+    }
+
+    .success-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(26, 203, 127, .1);
+      border: 1px solid rgba(26, 203, 127, .25);
+      color: #43d79a;
+      font-size: 23px;
+    }
+
+    .success-card h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .success-card p {
+      color: #96969f;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      padding: 0 18px;
+      margin-top: 17px;
+      border-radius: 12px;
+      text-decoration: none;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      height: 74px;
+      background: rgba(7, 7, 8, .94);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(560px, 100%);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .nav-item {
+      text-decoration: none;
+      color: #6f6f79;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a657ff;
+    }
+
+    @media (max-width: 380px) {
+      .payment-number {
+        font-size: 21px;
+      }
+
+      .hero h1 {
+        font-size: 24px;
+      }
+    }
+  </style></head><body><div class="container">  <header>
+    <a class="back" href="dashboard.html">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a><img src="logo.png" class="header-logo" alt="OSMO">
+
+<div>
+  <div class="header-title">OSMO</div>
+  <div class="header-subtitle">Dépôt</div>
+</div>
+
+  </header>  <section class="hero">
+    <h1>Effectuer un dépôt</h1>
+    <p>
+      Effectuez votre paiement puis envoyez la preuve afin que votre demande
+      puisse être vérifiée par l'administration.
+    </p>
+  </section>  <div id="message" class="message"></div>  <section class="card payment-card">
+    <div class="card-title">
+      <i class="fa-solid fa-wallet"></i>
+      Informations de paiement
+    </div><div class="operator-row">
+  <div>
+    <div class="operator-name" id="operatorName">WAVE</div>
+    <div class="payment-number" id="depositPhone">—</div>
+  </div>
+</div>
+
+<div class="payment-note">
+  Envoyez le montant choisi vers ce numéro WAVE avant de soumettre votre
+  demande de dépôt.
+</div>
+
+  </section>  <section class="card">
+    <div class="card-title">
+      <i class="fa-solid fa-list-check"></i>
+      Comment procéder
+    </div><div class="step">
+  <div class="step-number">1</div>
+  <div class="step-text">
+    Choisissez le montant que vous souhaitez déposer.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-number">2</div>
+  <div class="step-text">
+    Effectuez le paiement avec WAVE vers le numéro indiqué ci-dessus.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-number">3</div>
+  <div class="step-text">
+    Prenez une capture claire de la confirmation de paiement.
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-number">4</div>
+  <div class="step-text">
+    Envoyez la preuve avec votre demande. Votre solde sera crédité après
+    validation.
+  </div>
+</div>
+
+  </section>  <section class="card" id="depositFormCard"><div class="card-title">
+  <i class="fa-solid fa-arrow-up-right-dots"></i>
+  Nouvelle demande
+</div>
+
+<form id="depositForm">
+
+  <div class="field">
+    <label for="amount">Montant du dépôt</label>
+
+    <div class="input-wrap">
+      <i class="fa-solid fa-coins"></i>
+      <input
+        id="amount"
+        type="number"
+        min="3000"
+        step="1"
+        placeholder="Ex. 5000"
+        required
+      >
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="payerPhone">Numéro utilisé pour le paiement</label>
+
+    <div class="input-wrap">
+      <i class="fa-solid fa-phone"></i>
+      <input
+        id="payerPhone"
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        placeholder="10 chiffres"
+        required
+      >
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="proof">Preuve de paiement</label>
+
+    <div class="file-box">
+      <input
+        id="proof"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        required
+      >
+
+      <div class="file-help">
+        Ajoutez une capture claire de votre paiement WAVE.
+        Formats acceptés : JPG, PNG ou WEBP.
+      </div>
+
+      <div id="selectedFile" class="selected-file"></div>
+    </div>
+  </div>
+
+  <button id="submitBtn" class="submit-btn" type="submit">
+    <i class="fa-solid fa-paper-plane"></i>
+    &nbsp; ENVOYER LA DEMANDE
+  </button>
+
+</form>
+
+  </section>  <section class="card success-card" id="successCard"><div class="success-icon">
+  <i class="fa-solid fa-check"></i>
+</div>
+
+<h2>Demande envoyée</h2>
+
+<p>
+  Votre demande de dépôt et votre preuve de paiement ont bien été
+  enregistrées. Elle sera vérifiée avant le crédit de votre solde.
+</p>
+
+<a href="mes-depots.html" class="secondary-btn">
+  Voir mes dépôts
+</a>
+
+  </section></div><nav class="bottom-nav">
+  <div class="nav-inner"><a href="dashboard.html" class="nav-item">
+  <i class="fa-solid fa-house"></i>
+  <span>ACCUEIL</span>
+</a>
+
+<a href="produits.html" class="nav-item">
+  <i class="fa-solid fa-chart-line"></i>
+  <span>PRODUIT</span>
+</a>
+
+<a href="equipe.html" class="nav-item">
+  <i class="fa-solid fa-users"></i>
+  <span>ÉQUIPE</span>
+</a>
+
+<a href="compte.html" class="nav-item">
+  <i class="fa-solid fa-user"></i>
+  <span>PROFIL</span>
+</a>
+
+  </div>
+</nav><script>
+  const SUPABASE_URL =
+    "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const sessionToken =
+    localStorage.getItem("osmo_session_token");
+
+  if (!sessionToken) {
+    window.location.href = "connexion.html";
+  }
+
+  const message = document.getElementById("message");
+  const depositForm = document.getElementById("depositForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const proofInput = document.getElementById("proof");
+  const selectedFile = document.getElementById("selectedFile");
+
+  let minDeposit = 3000;
+
+  function showMessage(text, type = "error") {
+    message.textContent = text;
+    message.className = "message " + type;
+    message.style.display = "block";
+  }
+
+  function hideMessage() {
+    message.style.display = "none";
+  }
+
+  function cleanPhone(value) {
+    return value.replace(/\D/g, "").slice(0, 10);
+  }
+
+  document
+    .getElementById("payerPhone")
+    .addEventListener("input", function () {
+      this.value = cleanPhone(this.value);
+    });
+
+  proofInput.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (!file) {
+      selectedFile.style.display = "none";
+      selectedFile.textContent = "";
+      return;
+    }
+
+    selectedFile.textContent = "Fichier sélectionné : " + file.name;
+    selectedFile.style.display = "block";
+  });
+
+  async function loadSettings() {
+
+    const { data, error } =
+      await supabaseClient.rpc("public_settings");
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    if (!data) return;
+
+    minDeposit =
+      Number(data.min_deposit || 3000);
+
+    document.getElementById("amount").min =
+      minDeposit;
+
+    document.getElementById("amount").placeholder =
+      "Minimum " + minDeposit.toLocaleString("fr-FR") + " XOF";
+
+    document.getElementById("operatorName").textContent =
+      data.deposit_operator || "WAVE";
+
+    document.getElementById("depositPhone").textContent =
+      data.deposit_phone || "—";
+  }
+
+  loadSettings();
+
+  depositForm.addEventListener("submit", async function (event) {
+
+    event.preventDefault();
+
+    hideMessage();
+
+    const amount =
+      Number(document.getElementById("amount").value);
+
+    const payerPhone =
+      cleanPhone(document.getElementById("payerPhone").value);
+
+    const proofFile =
+      proofInput.files[0];
+
+    if (!amount || amount < minDeposit) {
+      showMessage(
+        "Le montant minimum du dépôt est de " +
+        minDeposit.toLocaleString("fr-FR") +
+        " XOF."
+      );
+      return;
+    }
+
+    if (!/^\d{10}$/.test(payerPhone)) {
+      showMessage(
+        "Le numéro utilisé pour le paiement doit contenir exactement 10 chiffres."
+      );
+      return;
+    }
+
+    if (!proofFile) {
+      showMessage(
+        "La preuve de paiement est obligatoire."
+      );
+      return;
+    }
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+
+    if (!allowedTypes.includes(proofFile.type)) {
+      showMessage(
+        "Veuillez sélectionner une image JPG, PNG ou WEBP."
+      );
+      return;
+    }
+
+    if (proofFile.size > 10 * 1024 * 1024) {
+      showMessage(
+        "La preuve de paiement ne doit pas dépasser 10 Mo."
+      );
+      return;
+    }
+
+    submitBtn.disabled = true;
+
+    submitBtn.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> TÉLÉVERSEMENT...';
+
+    try {
+
+      const userId =
+        localStorage.getItem("osmo_user_id");
+
+      if (!userId) {
+        throw new Error(
+          "Session utilisateur introuvable."
+        );
+      }
+
+      const extension =
+        proofFile.name
+          .split(".")
+          .pop()
+          .toLowerCase();
+
+      const uniqueName =
+        "proof_" +
+        Date.now() +
+        "_" +
+        Math.random()
+          .toString(36)
+          .substring(2, 10) +
+        "." +
+        extension;
+
+      const storagePath =
+        userId + "/" + uniqueName;
+
+      const { error: uploadError } =
+        await supabaseClient
+          .storage
+          .from("deposit-proofs")
+          .upload(
+            storagePath,
+            proofFile,
+            {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: proofFile.type
+            }
+          );
+
+      if (uploadError) {
+        console.error(uploadError);
+        throw new Error(
+          "Impossible d'envoyer la preuve de paiement."
+        );
+      }
+
+      submitBtn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> ENREGISTREMENT...';
+
+      const { data, error } =
+        await supabaseClient.rpc(
+          "create_my_deposit",
+          {
+            p_session_token: sessionToken,
+            p_amount: amount,
+            p_payer_phone: payerPhone,
+            p_proof_path: storagePath
+          }
+        );
+
+      if (error) {
+        console.error(error);
+
+        /*
+         * Si la création du dépôt échoue après
+         * l'envoi de la preuve, on tente de supprimer
+         * le fichier afin de ne pas laisser un fichier orphelin.
+         */
+        await supabaseClient
+          .storage
+          .from("deposit-proofs")
+          .remove([storagePath]);
+
+        throw new Error(
+          error.message ||
+          "Impossible d'enregistrer la demande de dépôt."
+        );
+      }
+
+      console.log("Dépôt créé :", data);
+
+      document.getElementById("depositFormCard")
+        .style.display = "none";
+
+      document.getElementById("successCard")
+        .style.display = "block";
+
+      showMessage(
+        "Votre demande de dépôt a été envoyée avec sa preuve de paiement.",
+        "success"
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        error.message ||
+        "Une erreur est survenue. Veuillez réessayer."
+      );
+
+      submitBtn.disabled = false;
+
+      submitBtn.innerHTML =
+        '<i class="fa-solid fa-paper-plane"></i> &nbsp; ENVOYER LA DEMANDE';
+    }
+
+  });
+</script></body>
+</html>
