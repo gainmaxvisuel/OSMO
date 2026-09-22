@@ -1,0 +1,938 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>OSMO — Compte de retrait</title>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(111, 0, 255, .22), transparent 38%),
+        #050505;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      width: min(94%, 560px);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(146,67,255,.35);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-subtitle {
+      color: #85858e;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .hero {
+      margin: 10px 0 20px;
+    }
+
+    .hero h1 {
+      font-size: 27px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      color: #91919a;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      padding: 19px;
+      margin-bottom: 15px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 17px;
+    }
+
+    .card-title i {
+      color: #9c4dff;
+    }
+
+    .wave-card {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 15px;
+      background: rgba(143,66,255,.07);
+      border: 1px solid rgba(143,66,255,.15);
+    }
+
+    .wave-icon {
+      width: 45px;
+      height: 45px;
+      flex: 0 0 45px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #b76aff;
+      background: rgba(143,66,255,.12);
+    }
+
+    .wave-title {
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .wave-text {
+      color: #85858f;
+      font-size: 10px;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      color: #d4d4da;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap > i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777781;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      height: 50px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.035);
+      color: #fff;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    input[type="tel"],
+    input[type="text"] {
+      padding: 0 14px 0 42px;
+    }
+
+    input[type="password"] {
+      padding: 0 45px 0 42px;
+    }
+
+    input:focus {
+      border-color: rgba(155,74,255,.65);
+      box-shadow: 0 0 0 3px rgba(129,40,255,.08);
+    }
+
+    .input-hint {
+      color: #70707a;
+      font-size: 9px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 0;
+      background: transparent;
+      color: #777781;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .save-btn {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(135deg,#7b20e8,#a347ff);
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(115,28,222,.22);
+      margin-top: 2px;
+    }
+
+    .save-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .message {
+      display: none;
+      padding: 13px;
+      margin-bottom: 15px;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(220,40,70,.09);
+      border: 1px solid rgba(220,40,70,.18);
+      color: #ff8b9a;
+    }
+
+    .message.success {
+      display: block;
+      background: rgba(20,190,120,.09);
+      border: 1px solid rgba(20,190,120,.18);
+      color: #70dfb0;
+    }
+
+    .current-account {
+      display: none;
+      padding: 14px;
+      margin-bottom: 18px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .current-label {
+      color: #777781;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .current-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+
+    .current-phone {
+      color: #a4a4ad;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .security {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: #777781;
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
+    .security i {
+      color: #9b4dff;
+      margin-top: 2px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      height: 74px;
+      background: rgba(7,7,8,.95);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(560px,100%);
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+    }
+
+    .nav-item {
+      color: #6f6f79;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a657ff;
+    }
+  </style></head><body><div class="container">  <header><a href="retrait.html" class="back">
+  <i class="fa-solid fa-arrow-left"></i>
+</a>
+
+<img
+  src="logo.png"
+  class="logo"
+  alt="OSMO"
+>
+
+<div>
+  <div class="header-title">OSMO</div>
+  <div class="header-subtitle">Compte de retrait</div>
+</div>
+
+  </header>  <section class="hero">
+    <h1>Compte de retrait</h1><p>
+  Enregistrez le compte WAVE sur lequel vos retraits
+  doivent être envoyés.
+</p>
+
+  </section>  <div id="message" class="message"></div>  <section
+    id="currentAccount"
+    class="current-account"
+  >
+    <div class="current-label">
+      Compte actuellement enregistré
+    </div><div
+  id="currentName"
+  class="current-name"
+>
+  —
+</div>
+
+<div
+  id="currentPhone"
+  class="current-phone"
+>
+  —
+</div>
+
+  </section>  <section class="card"><div class="card-title">
+  <i class="fa-solid fa-wallet"></i>
+  Informations WAVE
+</div>
+
+<div class="wave-card">
+
+  <div class="wave-icon">
+    <i class="fa-solid fa-mobile-screen-button"></i>
+  </div>
+
+  <div>
+    <div class="wave-title">
+      Compte WAVE
+    </div>
+
+    <div class="wave-text">
+      Le compte enregistré sera utilisé pour vos demandes
+      de retrait.
+    </div>
+  </div>
+
+</div>
+
+<form id="accountForm">
+
+  <div class="field">
+
+    <label for="phone">
+      Numéro WAVE
+    </label>
+
+    <div class="input-wrap">
+
+      <i class="fa-solid fa-phone"></i>
+
+      <input
+        id="phone"
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        placeholder="Ex. 0700000000"
+        autocomplete="tel"
+        required
+      >
+
+    </div>
+
+    <div class="input-hint">
+      Le numéro doit contenir exactement 10 chiffres.
+    </div>
+
+  </div>
+
+  <div class="field">
+
+    <label for="beneficiary">
+      Nom du bénéficiaire
+    </label>
+
+    <div class="input-wrap">
+
+      <i class="fa-solid fa-user"></i>
+
+      <input
+        id="beneficiary"
+        type="text"
+        maxlength="100"
+        placeholder="Nom complet du bénéficiaire"
+        autocomplete="name"
+        required
+      >
+
+    </div>
+
+  </div>
+
+  <div class="field">
+
+    <label for="transactionPassword">
+      Mot de passe de transaction
+    </label>
+
+    <div class="input-wrap">
+
+      <i class="fa-solid fa-lock"></i>
+
+      <input
+        id="transactionPassword"
+        type="password"
+        minlength="4"
+        maxlength="100"
+        placeholder="Créer un mot de passe"
+        autocomplete="new-password"
+        required
+      >
+
+      <button
+        type="button"
+        class="toggle-password"
+        data-target="transactionPassword"
+      >
+        <i class="fa-solid fa-eye"></i>
+      </button>
+
+    </div>
+
+    <div class="input-hint">
+      Minimum 4 caractères. Ce mot de passe sera demandé
+      lors d'un retrait.
+    </div>
+
+  </div>
+
+  <div class="field">
+
+    <label for="confirmPassword">
+      Confirmer le mot de passe
+    </label>
+
+    <div class="input-wrap">
+
+      <i class="fa-solid fa-shield-halved"></i>
+
+      <input
+        id="confirmPassword"
+        type="password"
+        minlength="4"
+        maxlength="100"
+        placeholder="Confirmer le mot de passe"
+        autocomplete="new-password"
+        required
+      >
+
+      <button
+        type="button"
+        class="toggle-password"
+        data-target="confirmPassword"
+      >
+        <i class="fa-solid fa-eye"></i>
+      </button>
+
+    </div>
+
+  </div>
+
+  <button
+    type="submit"
+    class="save-btn"
+    id="saveBtn"
+  >
+    <i class="fa-solid fa-floppy-disk"></i>
+    &nbsp; ENREGISTRER LE COMPTE
+  </button>
+
+</form>
+
+<div class="security">
+
+  <i class="fa-solid fa-shield-halved"></i>
+
+  <span>
+    Les informations de votre compte sont enregistrées
+    via la procédure sécurisée de la plateforme. Votre
+    mot de passe de transaction est stocké sous forme
+    protégée et n'est pas enregistré en clair.
+  </span>
+
+</div>
+
+  </section></div><nav class="bottom-nav">  <div class="nav-inner"><a
+  href="dashboard.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-house"></i>
+  <span>ACCUEIL</span>
+</a>
+
+<a
+  href="produits.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-chart-line"></i>
+  <span>PRODUIT</span>
+</a>
+
+<a
+  href="equipe.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-users"></i>
+  <span>ÉQUIPE</span>
+</a>
+
+<a
+  href="compte.html"
+  class="nav-item active"
+>
+  <i class="fa-solid fa-user"></i>
+  <span>PROFIL</span>
+</a>
+
+  </div></nav><script>
+
+  const SUPABASE_URL =
+    "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const sessionToken =
+    localStorage.getItem("osmo_session_token");
+
+  if (!sessionToken) {
+    window.location.href = "connexion.html";
+  }
+
+  const form =
+    document.getElementById("accountForm");
+
+  const saveBtn =
+    document.getElementById("saveBtn");
+
+  const message =
+    document.getElementById("message");
+
+  function showMessage(text, type = "error") {
+
+    message.textContent = text;
+
+    message.className =
+      "message " + type;
+
+    message.style.display =
+      "block";
+  }
+
+  function hideMessage() {
+
+    message.style.display =
+      "none";
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  /*
+   * Afficher / masquer les mots de passe.
+   */
+  document
+    .querySelectorAll(".toggle-password")
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        function() {
+
+          const target =
+            document.getElementById(
+              this.dataset.target
+            );
+
+          const icon =
+            this.querySelector("i");
+
+          if (target.type === "password") {
+
+            target.type = "text";
+
+            icon.className =
+              "fa-solid fa-eye-slash";
+
+          } else {
+
+            target.type = "password";
+
+            icon.className =
+              "fa-solid fa-eye";
+          }
+
+        }
+      );
+
+    });
+
+  /*
+   * Autoriser uniquement les chiffres
+   * dans le numéro de téléphone.
+   */
+  document
+    .getElementById("phone")
+    .addEventListener(
+      "input",
+      function() {
+
+        this.value =
+          this.value
+            .replace(/\D/g, "")
+            .slice(0, 10);
+
+      }
+    );
+
+  /*
+   * Charger le compte de retrait existant.
+   */
+  async function loadExistingAccount() {
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        "my_withdrawal_account",
+        {
+          p_session_token:
+            sessionToken
+        }
+      );
+
+    if (error) {
+
+      console.error(error);
+
+      throw new Error(
+        "Impossible de charger votre compte de retrait."
+      );
+    }
+
+    if (!data) {
+      return;
+    }
+
+    const currentAccount =
+      document.getElementById(
+        "currentAccount"
+      );
+
+    currentAccount.style.display =
+      "block";
+
+    document.getElementById(
+      "currentName"
+    ).textContent =
+      data.beneficiary_name || "—";
+
+    document.getElementById(
+      "currentPhone"
+    ).textContent =
+      (data.account_phone || "—") +
+      " • " +
+      (data.operator || "WAVE");
+
+    /*
+     * Préremplir les informations
+     * existantes.
+     */
+    document.getElementById("phone")
+      .value =
+      data.account_phone || "";
+
+    document.getElementById("beneficiary")
+      .value =
+      data.beneficiary_name || "";
+  }
+
+  /*
+   * Enregistrer / modifier le compte.
+   */
+  form.addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+      hideMessage();
+
+      const phone =
+        document.getElementById("phone")
+          .value
+          .trim();
+
+      const beneficiary =
+        document.getElementById("beneficiary")
+          .value
+          .trim();
+
+      const transactionPassword =
+        document.getElementById(
+          "transactionPassword"
+        ).value;
+
+      const confirmPassword =
+        document.getElementById(
+          "confirmPassword"
+        ).value;
+
+      /*
+       * Vérification du numéro ivoirien
+       * au format plateforme : 10 chiffres.
+       */
+      if (!/^\d{10}$/.test(phone)) {
+
+        showMessage(
+          "Le numéro WAVE doit contenir exactement 10 chiffres."
+        );
+
+        return;
+      }
+
+      if (beneficiary.length < 2) {
+
+        showMessage(
+          "Veuillez saisir le nom complet du bénéficiaire."
+        );
+
+        return;
+      }
+
+      if (transactionPassword.length < 4) {
+
+        showMessage(
+          "Le mot de passe de transaction doit contenir au moins 4 caractères."
+        );
+
+        return;
+      }
+
+      if (transactionPassword !== confirmPassword) {
+
+        showMessage(
+          "Les deux mots de passe ne correspondent pas."
+        );
+
+        return;
+      }
+
+      saveBtn.disabled = true;
+
+      saveBtn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> ENREGISTREMENT...';
+
+      try {
+
+        const { data, error } =
+          await supabaseClient.rpc(
+            "save_my_withdrawal_account_secure",
+            {
+              p_session_token:
+                sessionToken,
+
+              p_account_phone:
+                phone,
+
+              p_beneficiary_name:
+                beneficiary,
+
+              p_transaction_password:
+                transactionPassword
+            }
+          );
+
+        if (error) {
+
+          console.error(error);
+
+          throw new Error(
+            error.message ||
+            "Impossible d'enregistrer le compte."
+          );
+        }
+
+        console.log(
+          "Compte de retrait enregistré :",
+          data
+        );
+
+        /*
+         * Recharger les informations affichées
+         * depuis la base.
+         */
+        await loadExistingAccount();
+
+        /*
+         * Nettoyer les champs de mot de passe
+         * après l'enregistrement.
+         */
+        document.getElementById(
+          "transactionPassword"
+        ).value = "";
+
+        document.getElementById(
+          "confirmPassword"
+        ).value = "";
+
+        showMessage(
+          "Votre compte WAVE a été enregistré avec succès.",
+          "success"
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          error.message ||
+          "Une erreur est survenue lors de l'enregistrement."
+        );
+
+      } finally {
+
+        saveBtn.disabled = false;
+
+        saveBtn.innerHTML =
+          '<i class="fa-solid fa-floppy-disk"></i> &nbsp; ENREGISTRER LE COMPTE';
+      }
+
+    }
+  );
+
+  /*
+   * Initialisation.
+   */
+  async function initialize() {
+
+    try {
+
+      await loadExistingAccount();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        error.message ||
+        "Impossible de charger les informations."
+      );
+    }
+
+  }
+
+  initialize();
+
+</script></body>
+</html>
