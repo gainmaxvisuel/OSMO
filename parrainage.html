@@ -1,0 +1,1264 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>OSMO — Parrainage</title>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(111, 0, 255, .22),
+          transparent 38%
+        ),
+        #050505;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      width: min(94%, 560px);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(146,67,255,.35);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-subtitle {
+      color: #85858e;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .hero {
+      margin: 10px 0 20px;
+    }
+
+    .hero h1 {
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .hero p {
+      color: #91919a;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .message {
+      display: none;
+      padding: 13px;
+      margin-bottom: 15px;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(220,40,70,.09);
+      border: 1px solid rgba(220,40,70,.18);
+      color: #ff8b9a;
+    }
+
+    .referral-main {
+      padding: 18px;
+      border-radius: 19px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(27,16,40,.98),
+          rgba(10,8,13,.98)
+        );
+      border: 1px solid rgba(157,78,255,.20);
+      margin-bottom: 12px;
+    }
+
+    .referral-label {
+      color: #85858e;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      font-weight: 700;
+    }
+
+    .code-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 9px;
+    }
+
+    .referral-code {
+      flex: 1;
+      min-width: 0;
+      padding: 13px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #c58cff;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .copy-btn {
+      width: 45px;
+      height: 45px;
+      flex: 0 0 45px;
+      border: 0;
+      border-radius: 12px;
+      color: #fff;
+      background: linear-gradient(135deg,#7b20e8,#a347ff);
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .referral-link {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border-radius: 11px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.06);
+      color: #92929b;
+      font-size: 9px;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .share-btn {
+      width: 100%;
+      height: 44px;
+      margin-top: 11px;
+      border: 0;
+      border-radius: 12px;
+      background: rgba(157,78,255,.11);
+      border: 1px solid rgba(157,78,255,.18);
+      color: #bf8aff;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .share-btn i {
+      margin-right: 7px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .summary-card {
+      padding: 16px;
+      border-radius: 17px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .summary-label {
+      color: #80808a;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      font-weight: 600;
+    }
+
+    .summary-value {
+      margin-top: 7px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .summary-value.purple {
+      color: #ae61ff;
+    }
+
+    .summary-value.green {
+      color: #65dca8;
+    }
+
+    .summary-full {
+      grid-column: 1 / -1;
+    }
+
+    .summary-full .summary-value {
+      font-size: 21px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 20px 0 12px;
+    }
+
+    .section-title h2 {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .section-title span {
+      color: #777781;
+      font-size: 9px;
+    }
+
+    .level-card {
+      padding: 16px;
+      margin-bottom: 10px;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .level-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .level-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .level-icon {
+      width: 39px;
+      height: 39px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ae61ff;
+      background: rgba(143,66,255,.10);
+      border: 1px solid rgba(143,66,255,.18);
+    }
+
+    .level-title {
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .level-description {
+      color: #777781;
+      font-size: 9px;
+      margin-top: 3px;
+    }
+
+    .level-count {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .level-count-label {
+      color: #777781;
+      font-size: 8px;
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    .level-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+
+    .commission-label {
+      color: #777781;
+      font-size: 9px;
+    }
+
+    .commission-value {
+      color: #65dca8;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .members {
+      margin-top: 20px;
+    }
+
+    .member-card {
+      padding: 14px;
+      margin-bottom: 9px;
+      border-radius: 16px;
+      background: rgba(16,16,18,.95);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .member-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .member-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .member-icon {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 36px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.04);
+      color: #a95bff;
+    }
+
+    .member-id {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .member-code {
+      color: #777781;
+      font-size: 8px;
+      margin-top: 3px;
+    }
+
+    .level-badge {
+      padding: 6px 8px;
+      border-radius: 8px;
+      color: #bd84ff;
+      background: rgba(157,78,255,.09);
+      border: 1px solid rgba(157,78,255,.14);
+      font-size: 8px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .member-date {
+      margin-top: 10px;
+      color: #6f6f78;
+      font-size: 8px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .empty-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 14px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9d4eff;
+      background: rgba(143,66,255,.09);
+      border: 1px solid rgba(143,66,255,.15);
+      font-size: 20px;
+    }
+
+    .empty h3 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .empty p {
+      color: #85858f;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 35px 10px;
+      color: #777781;
+      font-size: 11px;
+    }
+
+    .loading i {
+      color: #9e4dff;
+      margin-right: 6px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      height: 74px;
+      background: rgba(7,7,8,.95);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(560px,100%);
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+    }
+
+    .nav-item {
+      color: #6f6f79;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a657ff;
+    }
+
+    @media (max-width: 380px) {
+      .referral-code {
+        font-size: 16px;
+      }
+
+      .summary-value {
+        font-size: 16px;
+      }
+    }
+  </style></head><body><div class="container">  <header><a href="dashboard.html" class="back">
+  <i class="fa-solid fa-arrow-left"></i>
+</a>
+
+<img
+  src="logo.png"
+  class="logo"
+  alt="OSMO"
+>
+
+<div>
+  <div class="header-title">OSMO</div>
+  <div class="header-subtitle">Programme de parrainage</div>
+</div>
+
+  </header>  <section class="hero"><h1>Parrainage</h1>
+
+<p>
+  Invitez de nouveaux investisseurs et suivez
+  vos filleuls ainsi que les commissions générées
+  à chaque niveau.
+</p>
+
+  </section>  <div id="message" class="message"></div>  <section class="referral-main"><div class="referral-label">
+  Votre code de parrainage
+</div>
+
+<div class="code-row">
+
+  <div
+    id="referralCode"
+    class="referral-code"
+  >
+    —
+  </div>
+
+  <button
+    type="button"
+    class="copy-btn"
+    id="copyCodeBtn"
+    title="Copier le code"
+  >
+    <i class="fa-regular fa-copy"></i>
+  </button>
+
+</div>
+
+<div
+  id="referralLink"
+  class="referral-link"
+>
+  —
+</div>
+
+<button
+  type="button"
+  class="share-btn"
+  id="shareBtn"
+>
+  <i class="fa-solid fa-share-nodes"></i>
+  PARTAGER MON LIEN
+</button>
+
+  </section>  <section class="summary"><div class="summary-card">
+
+  <div class="summary-label">
+    Total filleuls
+  </div>
+
+  <div
+    class="summary-value purple"
+    id="totalPeople"
+  >
+    0
+  </div>
+
+</div>
+
+<div class="summary-card">
+
+  <div class="summary-label">
+    Niveaux actifs
+  </div>
+
+  <div
+    class="summary-value purple"
+    id="activeLevels"
+  >
+    0
+  </div>
+
+</div>
+
+<div class="summary-card summary-full">
+
+  <div class="summary-label">
+    Commission totale reçue
+  </div>
+
+  <div
+    class="summary-value green"
+    id="totalCommission"
+  >
+    0 XOF
+  </div>
+
+</div>
+
+  </section>  <div class="section-title"><h2>Répartition par niveau</h2>
+
+<span>3 niveaux</span>
+
+  </div>  <div id="levelsList"><div class="loading">
+  <i class="fa-solid fa-spinner fa-spin"></i>
+  Chargement des niveaux...
+</div>
+
+  </div>  <div class="section-title"><h2>Mes filleuls</h2>
+
+<span id="membersCount">0 personne</span>
+
+  </div>  <div
+    id="membersList"
+    class="members"
+  ><div class="loading">
+  <i class="fa-solid fa-spinner fa-spin"></i>
+  Chargement des filleuls...
+</div>
+
+  </div></div><nav class="bottom-nav">  <div class="nav-inner"><a
+  href="dashboard.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-house"></i>
+  <span>ACCUEIL</span>
+</a>
+
+<a
+  href="produits.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-chart-line"></i>
+  <span>PRODUIT</span>
+</a>
+
+<a
+  href="equipe.html"
+  class="nav-item active"
+>
+  <i class="fa-solid fa-users"></i>
+  <span>ÉQUIPE</span>
+</a>
+
+<a
+  href="compte.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-user"></i>
+  <span>PROFIL</span>
+</a>
+
+  </div></nav><script>
+
+  const SUPABASE_URL =
+    "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const sessionToken =
+    localStorage.getItem(
+      "osmo_session_token"
+    );
+
+  if (!sessionToken) {
+    window.location.href =
+      "connexion.html";
+  }
+
+  const referralCodeElement =
+    document.getElementById(
+      "referralCode"
+    );
+
+  const referralLinkElement =
+    document.getElementById(
+      "referralLink"
+    );
+
+  const levelsList =
+    document.getElementById(
+      "levelsList"
+    );
+
+  const membersList =
+    document.getElementById(
+      "membersList"
+    );
+
+  const message =
+    document.getElementById(
+      "message"
+    );
+
+  let currentReferralCode = "";
+
+  let currentReferralLink = "";
+
+  function formatMoney(value) {
+
+    return Number(value || 0)
+      .toLocaleString("fr-FR") +
+      " XOF";
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatDate(value) {
+
+    if (!value) {
+      return "—";
+    }
+
+    const date =
+      new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleDateString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }
+    );
+  }
+
+  function showError(text) {
+
+    message.textContent = text;
+    message.className =
+      "message error";
+    message.style.display = "block";
+  }
+
+  function getLevelDescription(level) {
+
+    if (level === 1) {
+      return "Vos filleuls directs";
+    }
+
+    if (level === 2) {
+      return "Filleuls de votre niveau 1";
+    }
+
+    return "Filleuls de votre niveau 2";
+  }
+
+  async function loadReferralData() {
+
+    const [
+      dashboardResult,
+      summaryResult,
+      referralsResult
+    ] = await Promise.all([
+
+      supabaseClient.rpc(
+        "user_dashboard",
+        {
+          p_session_token:
+            sessionToken
+        }
+      ),
+
+      supabaseClient.rpc(
+        "my_referral_summary",
+        {
+          p_session_token:
+            sessionToken
+        }
+      ),
+
+      supabaseClient.rpc(
+        "user_referrals",
+        {
+          p_session_token:
+            sessionToken
+        }
+      )
+
+    ]);
+
+    if (dashboardResult.error) {
+      throw dashboardResult.error;
+    }
+
+    if (summaryResult.error) {
+      throw summaryResult.error;
+    }
+
+    if (referralsResult.error) {
+      throw referralsResult.error;
+    }
+
+    const dashboard =
+      dashboardResult.data || {};
+
+    const user =
+      dashboard.user || {};
+
+    currentReferralCode =
+      user.referral_code || "";
+
+    currentReferralLink =
+      window.location.origin +
+      window.location.pathname
+        .replace(
+          /[^/]*$/,
+          "index.html"
+        ) +
+      "?ref=" +
+      encodeURIComponent(
+        currentReferralCode
+      );
+
+    referralCodeElement.textContent =
+      currentReferralCode || "—";
+
+    referralLinkElement.textContent =
+      currentReferralLink;
+
+    const summary =
+      Array.isArray(summaryResult.data)
+        ? summaryResult.data
+        : [];
+
+    const referrals =
+      Array.isArray(referralsResult.data)
+        ? referralsResult.data
+        : [];
+
+    renderSummary(summary);
+
+    renderLevels(summary);
+
+    renderMembers(referrals);
+
+  }
+
+  function renderSummary(summary) {
+
+    const totalPeople =
+      summary.reduce(
+        (sum, row) =>
+          sum +
+          Number(
+            row.people_count || 0
+          ),
+        0
+      );
+
+    const totalCommission =
+      summary.reduce(
+        (sum, row) =>
+          sum +
+          Number(
+            row.commission_total || 0
+          ),
+        0
+      );
+
+    const activeLevels =
+      summary.filter(
+        row =>
+          Number(
+            row.people_count || 0
+          ) > 0
+      ).length;
+
+    document.getElementById(
+      "totalPeople"
+    ).textContent =
+      totalPeople;
+
+    document.getElementById(
+      "activeLevels"
+    ).textContent =
+      activeLevels;
+
+    document.getElementById(
+      "totalCommission"
+    ).textContent =
+      formatMoney(
+        totalCommission
+      );
+  }
+
+  function renderLevels(summary) {
+
+    const rows = [1, 2, 3].map(level => {
+
+      return summary.find(
+        row =>
+          Number(row.level) === level
+      ) || {
+        level,
+        people_count: 0,
+        commission_total: 0
+      };
+
+    });
+
+    levelsList.innerHTML =
+      rows.map(row => {
+
+        const level =
+          Number(row.level);
+
+        const people =
+          Number(
+            row.people_count || 0
+          );
+
+        const commission =
+          Number(
+            row.commission_total || 0
+          );
+
+        return `
+          <article class="level-card">
+
+            <div class="level-top">
+
+              <div class="level-name">
+
+                <div class="level-icon">
+                  <i class="fa-solid fa-layer-group"></i>
+                </div>
+
+                <div>
+
+                  <div class="level-title">
+                    Niveau ${level}
+                  </div>
+
+                  <div class="level-description">
+                    ${getLevelDescription(level)}
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div>
+
+                <div class="level-count">
+                  ${people}
+                </div>
+
+                <div class="level-count-label">
+                  ${people === 1 ? "PERSONNE" : "PERSONNES"}
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="level-bottom">
+
+              <span class="commission-label">
+                Commission reçue
+              </span>
+
+              <span class="commission-value">
+                ${formatMoney(commission)}
+              </span>
+
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+  }
+
+  function renderMembers(referrals) {
+
+    document.getElementById(
+      "membersCount"
+    ).textContent =
+      referrals.length +
+      (
+        referrals.length === 1
+          ? " personne"
+          : " personnes"
+      );
+
+    if (!referrals.length) {
+
+      membersList.innerHTML = `
+        <div class="empty">
+
+          <div class="empty-icon">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+
+          <h3>Aucun filleul</h3>
+
+          <p>
+            Partagez votre lien de parrainage
+            pour commencer à constituer votre équipe.
+          </p>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    membersList.innerHTML =
+      referrals.map(member => {
+
+        const level =
+          Number(member.level || 0);
+
+        return `
+          <article class="member-card">
+
+            <div class="member-top">
+
+              <div class="member-left">
+
+                <div class="member-icon">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+
+                <div>
+
+                  <div class="member-id">
+                    ${escapeHtml(
+          member.professional_id ||
+                      "Utilisateur"
+                    )}
+                  </div>
+
+                  <div class="member-code">
+                    Code :
+                    ${escapeHtml(
+                      member.referral_code ||
+                      "—"
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+              <span class="level-badge">
+                NIVEAU ${level}
+              </span>
+
+            </div>
+
+            <div class="member-date">
+              Inscrit le
+              ${formatDate(
+                member.created_at
+              )}
+            </div>
+
+          </article>
+        `;
+
+      }).join("");
+  }
+
+  async function copyText(text) {
+
+    try {
+
+      await navigator.clipboard.writeText(
+        text
+      );
+
+      return true;
+
+    } catch (error) {
+
+      const textarea =
+        document.createElement("textarea");
+
+      textarea.value = text;
+
+      document.body.appendChild(
+        textarea
+      );
+
+      textarea.select();
+
+      const success =
+        document.execCommand("copy");
+
+      textarea.remove();
+
+      return success;
+    }
+  }
+
+  document
+    .getElementById("copyCodeBtn")
+    .addEventListener(
+      "click",
+      async () => {
+
+        if (!currentReferralCode) {
+          return;
+        }
+
+        const success =
+          await copyText(
+            currentReferralCode
+          );
+
+        if (success) {
+
+          const button =
+            document.getElementById(
+              "copyCodeBtn"
+            );
+
+          button.innerHTML =
+            '<i class="fa-solid fa-check"></i>';
+
+          setTimeout(() => {
+
+            button.innerHTML =
+              '<i class="fa-regular fa-copy"></i>';
+
+          }, 1600);
+        }
+
+      }
+    );
+
+  document
+    .getElementById("shareBtn")
+    .addEventListener(
+      "click",
+      async () => {
+
+        if (!currentReferralLink) {
+          return;
+        }
+
+        const shareData = {
+          title: "OSMO",
+          text:
+            "Rejoignez OSMO avec mon lien de parrainage :",
+          url:
+            currentReferralLink
+        };
+
+        try {
+
+          if (
+            navigator.share &&
+            typeof navigator.share === "function"
+          ) {
+
+            await navigator.share(
+              shareData
+            );
+
+          } else {
+
+            const success =
+              await copyText(
+                currentReferralLink
+              );
+
+            if (success) {
+
+              const button =
+                document.getElementById(
+                  "shareBtn"
+                );
+
+              button.innerHTML =
+                '<i class="fa-solid fa-check"></i> LIEN COPIÉ';
+
+              setTimeout(() => {
+
+                button.innerHTML =
+                  '<i class="fa-solid fa-share-nodes"></i> PARTAGER MON LIEN';
+
+              }, 1800);
+
+            }
+
+          }
+
+        } catch (error) {
+
+          if (
+            error &&
+            error.name === "AbortError"
+          ) {
+            return;
+          }
+
+          console.error(error);
+        }
+
+      }
+    );
+
+  async function initialize() {
+
+    try {
+
+      await loadReferralData();
+
+    } catch (error) {
+
+      console.error(error);
+
+      levelsList.innerHTML = "";
+
+      membersList.innerHTML = "";
+
+      showError(
+        error.message ||
+        "Impossible de charger les données de parrainage."
+      );
+    }
+  }
+
+  initialize();
+
+</script>
+</body>
+</html>
