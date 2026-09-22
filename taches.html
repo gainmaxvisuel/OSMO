@@ -1,0 +1,744 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>OSMO — Tâches</title>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(139, 92, 246, .14), transparent 35%),
+        #070711;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 92px;
+    }
+
+    .page {
+      width: min(100%, 560px);
+      margin: auto;
+      padding: 18px 16px 30px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: #11111d;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .header-title {
+      flex: 1;
+    }
+
+    .header-title h1 {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .header-title p {
+      margin-top: 4px;
+      color: #9292a6;
+      font-size: 12px;
+    }
+
+    .intro {
+      background: linear-gradient(145deg, #111122, #0d0d18);
+      border: 1px solid rgba(139,92,246,.18);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .intro-top {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .intro-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: rgba(139,92,246,.13);
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+    }
+
+    .intro h2 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .intro p {
+      margin-top: 5px;
+      color: #9292a6;
+      line-height: 1.5;
+      font-size: 12px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 45px 15px;
+      color: #9292a6;
+    }
+
+    .loading i {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #a78bfa;
+    }
+
+    .empty {
+      background: #10101b;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 20px;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 15px;
+      border-radius: 18px;
+      background: rgba(139,92,246,.10);
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .empty h3 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .empty p {
+      color: #858597;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .task-card {
+      background: linear-gradient(145deg, #11111e, #0d0d17);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      padding: 17px;
+    }
+
+    .task-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .task-icon {
+      flex-shrink: 0;
+      width: 45px;
+      height: 45px;
+      border-radius: 14px;
+      background: rgba(139,92,246,.12);
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .task-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-info h3 {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .platform {
+      display: inline-block;
+      margin-top: 6px;
+      color: #9898aa;
+      font-size: 11px;
+    }
+
+    .reward {
+      white-space: nowrap;
+      color: #c4b5fd;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .task-description {
+      color: #9292a6;
+      font-size: 12px;
+      line-height: 1.55;
+      margin: 13px 0;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 9px;
+    }
+
+    .task-actions a,
+    .claim-btn {
+      flex: 1;
+      min-height: 43px;
+      border-radius: 12px;
+      border: none;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-decoration: none;
+    }
+
+    .open-btn {
+      background: #181827;
+      color: #d0d0dc;
+      border: 1px solid rgba(255,255,255,.08) !important;
+    }
+
+    .claim-btn {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    .claim-btn:disabled {
+      background: #252536;
+      color: #77778a;
+      cursor: not-allowed;
+    }
+
+    .claim-btn.claimed {
+      background: rgba(16,185,129,.10);
+      color: #34d399;
+      border: 1px solid rgba(16,185,129,.18);
+      cursor: default;
+    }
+
+    .status-message {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 88px;
+      z-index: 20;
+      padding: 13px 15px;
+      border-radius: 13px;
+      background: #171724;
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+      font-size: 12px;
+      text-align: center;
+      display: none;
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.success {
+      border-color: rgba(16,185,129,.3);
+      color: #6ee7b7;
+    }
+
+    .status-message.error {
+      border-color: rgba(239,68,68,.3);
+      color: #fca5a5;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 15;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 74px;
+      background: rgba(10,10,18,.96);
+      border-top: 1px solid rgba(255,255,255,.07);
+      backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(100%, 560px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 7px 10px;
+    }
+
+    .nav-item {
+      color: #6f6f80;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .nav-item i {
+      font-size: 17px;
+    }
+
+    .nav-item.active {
+      color: #a78bfa;
+    }
+
+    @media (max-width: 380px) {
+      .task-actions {
+        flex-direction: column;
+      }
+
+      .reward {
+        font-size: 12px;
+      }
+    }
+  </style></head><body>  <main class="page"><header class="header">
+  <a href="dashboard.html" class="back">
+    <i class="fa-solid fa-arrow-left"></i>
+  </a>
+
+  <div class="header-title">
+    <h1>Tâches</h1>
+    <p>Gagnez des récompenses en accomplissant les tâches</p>
+  </div>
+</header>
+
+<section class="intro">
+  <div class="intro-top">
+    <div class="intro-icon">
+      <i class="fa-solid fa-list-check"></i>
+    </div>
+
+    <div>
+      <h2>Tâches disponibles</h2>
+      <p>
+        Ouvrez une tâche, réalisez l'action demandée puis réclamez votre récompense.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div id="loading" class="loading">
+  <i class="fa-solid fa-circle-notch fa-spin"></i>
+  <div>Chargement des tâches...</div>
+</div>
+
+<div id="empty" class="empty" style="display:none;">
+  <div class="empty-icon">
+    <i class="fa-solid fa-clipboard-list"></i>
+  </div>
+
+  <h3>Aucune tâche disponible</h3>
+
+  <p>
+    De nouvelles tâches seront affichées ici lorsqu'elles seront disponibles.
+  </p>
+</div>
+
+<section id="tasks" class="tasks"></section>
+
+  </main>  <div id="statusMessage" class="status-message"></div>  <nav class="bottom-nav">
+    <div class="nav-inner">  <a href="dashboard.html" class="nav-item">
+    <i class="fa-solid fa-house"></i>
+    <span>ACCUEIL</span>
+  </a>
+
+  <a href="produits.html" class="nav-item">
+    <i class="fa-solid fa-box"></i>
+    <span>PRODUIT</span>
+  </a>
+
+  <a href="equipe.html" class="nav-item">
+    <i class="fa-solid fa-users"></i>
+    <span>ÉQUIPE</span>
+  </a>
+
+  <a href="compte.html" class="nav-item">
+    <i class="fa-solid fa-user"></i>
+    <span>PROFIL</span>
+  </a>
+
+</div>
+
+  </nav>  <script>
+    const SUPABASE_URL =
+      "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const sessionToken =
+      localStorage.getItem("osmo_session_token");
+
+    const loading =
+      document.getElementById("loading");
+
+    const empty =
+      document.getElementById("empty");
+
+    const tasksContainer =
+      document.getElementById("tasks");
+
+    const statusMessage =
+      document.getElementById("statusMessage");
+
+    if (!sessionToken) {
+      window.location.href = "connexion.html";
+    }
+
+    function showMessage(message, type = "") {
+      statusMessage.textContent = message;
+      statusMessage.className =
+        "status-message show " + type;
+
+      setTimeout(() => {
+        statusMessage.className = "status-message";
+      }, 3500);
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return "";
+
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getTaskIcon(platform, type) {
+      const value =
+        `${platform || ""} ${type || ""}`.toLowerCase();
+
+      if (value.includes("tiktok")) {
+        return "fa-brands fa-tiktok";
+      }
+
+      if (value.includes("youtube")) {
+        return "fa-brands fa-youtube";
+      }
+
+      if (value.includes("instagram")) {
+        return "fa-brands fa-instagram";
+      }
+
+      if (value.includes("facebook")) {
+        return "fa-brands fa-facebook";
+      }
+
+      if (value.includes("telegram")) {
+        return "fa-brands fa-telegram";
+      }
+
+      if (value.includes("snap")) {
+        return "fa-brands fa-snapchat";
+      }
+
+      return "fa-solid fa-list-check";
+    }
+
+    async function loadTasks() {
+
+      loading.style.display = "block";
+      empty.style.display = "none";
+      tasksContainer.innerHTML = "";
+
+      const { data, error } =
+        await supabaseClient.rpc("public_tasks");
+
+      loading.style.display = "none";
+
+      if (error) {
+        console.error(error);
+
+        showMessage(
+          "Impossible de charger les tâches.",
+          "error"
+        );
+
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        empty.style.display = "block";
+        return;
+      }
+
+      data.forEach(task => {
+
+        const card =
+          document.createElement("article");
+
+        card.className = "task-card";
+
+        const reward =
+          Number(task.reward_amount || 0)
+            .toLocaleString("fr-FR");
+
+        const hasUrl =
+          task.task_url &&
+          task.task_url.trim() !== "";
+
+        card.innerHTML = `
+          <div class="task-top">
+
+            <div class="task-icon">
+              <i class="${getTaskIcon(
+                task.platform,
+                task.task_type
+              )}"></i>
+            </div>
+
+            <div class="task-info">
+
+              <h3>
+                ${escapeHtml(task.title)}
+              </h3>
+
+              ${
+                task.platform
+                  ? `<span class="platform">
+                       ${escapeHtml(task.platform)}
+                     </span>`
+                  : ""
+              }
+
+            </div>
+
+            <div class="reward">
+              +${reward} XOF
+            </div>
+
+          </div>
+
+          ${
+            task.description
+              ? `<div class="task-description">
+                   ${escapeHtml(task.description)}
+                 </div>`
+              : ""
+          }
+
+          <div class="task-actions">
+
+            ${
+              hasUrl
+                ? `<a
+                     class="open-btn"
+                     href="${escapeHtml(task.task_url)}"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     onclick="startTaskTimer('${task.id}')"
+                   >
+                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                     Ouvrir
+                   </a>`
+                : `<button
+                     class="open-btn"
+                     type="button"
+                     disabled
+                     style="opacity:.5;cursor:not-allowed;"
+                   >
+                     Aucun lien
+                   </button>`
+            }
+
+            <button
+              class="claim-btn"
+              id="claim-${task.id}"
+              type="button"
+              onclick="claimTask('${task.id}')"
+            >
+              <i class="fa-solid fa-coins"></i>
+              Réclamer
+            </button>
+
+          </div>
+        `;
+
+        tasksContainer.appendChild(card);
+      });
+    }
+
+    function startTaskTimer(taskId) {
+
+      const button =
+        document.getElementById(
+          "claim-" + taskId
+        );
+
+      if (!button || button.dataset.timerStarted) {
+        return;
+      }
+
+      button.dataset.timerStarted = "true";
+      button.disabled = true;
+
+      let remaining = 10;
+
+      button.innerHTML =
+        `<i class="fa-solid fa-clock"></i> Attendre ${remaining}s`;
+
+      const timer =
+        setInterval(() => {
+
+          remaining--;
+
+          if (remaining > 0) {
+
+            button.innerHTML =
+              `<i class="fa-solid fa-clock"></i> Attendre ${remaining}s`;
+
+            return;
+          }
+
+          clearInterval(timer);
+
+          button.disabled = false;
+
+          button.innerHTML =
+            `<i class="fa-solid fa-coins"></i> Réclamer`;
+
+        }, 1000);
+    }
+
+    async function claimTask(taskId) {
+
+      const button =
+        document.getElementById(
+          "claim-" + taskId
+        );
+
+      if (!button || button.disabled) {
+        return;
+      }
+
+      button.disabled = true;
+
+      button.innerHTML =
+        `<i class="fa-solid fa-circle-notch fa-spin"></i>
+         Traitement...`;
+
+      const { data, error } =
+        await supabaseClient.rpc(
+          "claim_task",
+          {
+            p_session_token: sessionToken,
+            p_task_id: taskId
+          }
+        );
+
+      if (error) {
+
+        console.error(error);
+
+        button.disabled = false;
+
+        button.innerHTML =
+          `<i class="fa-solid fa-coins"></i>
+           Réclamer`;
+
+        showMessage(
+          "Une erreur est survenue. Veuillez réessayer.",
+          "error"
+        );
+
+        return;
+      }
+
+      if (!data || !data.success) {
+
+        button.disabled = false;
+
+        button.innerHTML =
+          `<i class="fa-solid fa-coins"></i>
+           Réclamer`;
+
+        showMessage(
+          data?.message ||
+          "Impossible de réclamer cette tâche.",
+          "error"
+        );
+
+        if (
+          data?.message &&
+          data.message.toLowerCase().includes("déjà")
+        ) {
+          button.disabled = true;
+          button.classList.add("claimed");
+
+          button.innerHTML =
+            `<i class="fa-solid fa-check"></i>
+             Déjà réclamée`;
+        }
+
+        return;
+      }
+
+      button.disabled = true;
+      button.classList.add("claimed");
+
+      button.innerHTML =
+        `<i class="fa-solid fa-check"></i>
+         Réclamée`;
+
+      showMessage(
+        `+${Number(data.amount || 0).toLocaleString("fr-FR")} XOF ajoutés à votre solde.`,
+        "success"
+      );
+    }
+
+    loadTasks();
+  </script></body>
+  </html>
