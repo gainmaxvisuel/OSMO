@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>OSMO — Dépôt</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --black: #050507;
+      --card: #101016;
+      --card2: #15151d;
+      --purple: #7c3aed;
+      --purple2: #9333ea;
+      --violet: #a855f7;
+      --white: #ffffff;
+      --muted: #92929f;
+      --border: rgba(168, 85, 247, .17);
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    body {
+      min-height: 100vh;
+      padding-bottom: 100px;
+      font-family: "Inter", sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(124, 58, 237, .22),
+          transparent 35%
+        ),
+        var(--black);
+    }
+
+    .page {
+      width: 100%;
+      max-width: 620px;
+      margin: auto;
+      padding: 20px 16px 30px;
+    }
+
+    /* HEADER */
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 25px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand-logo {
+      width: 43px;
+      height: 43px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(168, 85, 247, .3);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .brand-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .back-button {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ddd6fe;
+      text-decoration: none;
+      border-radius: 13px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--border);
+    }
+
+    /* TITLE */
+
+    .title {
+      margin-bottom: 20px;
+    }
+
+    .title h1 {
+      margin-bottom: 7px;
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .title p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* PAYMENT CARD */
+
+    .payment-card {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 15px;
+      padding: 20px;
+      border-radius: 21px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(124,58,237,.18),
+          rgba(168,85,247,.035)
+        ),
+        var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .payment-card::before {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      right: -70px;
+      top: -80px;
+      border-radius: 50%;
+      background: rgba(168,85,247,.10);
+      filter: blur(3px);
+    }
+
+    .payment-title {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 18px;
+    }
+
+    .payment-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d8b4fe;
+      border-radius: 12px;
+      background: rgba(124,58,237,.15);
+    }
+
+    .payment-title h2 {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .payment-title p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .operator-box {
+      position: relative;
+      z-index: 1;
+      padding: 15px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .operator-label {
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+    }
+
+    .operator-value {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .operator-name {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .deposit-phone {
+      color: #d8b4fe;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    /* INSTRUCTION */
+
+    .instruction {
+      margin-bottom: 20px;
+      padding: 15px;
+      border-radius: 17px;
+      background: rgba(255,255,255,.025);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .instruction-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+      color: #ddd6fe;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .instruction ol {
+      padding-left: 19px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    /* FORM */
+
+    .form-card {
+      padding: 19px;
+      border-radius: 21px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+
+    .form-title {
+      margin-bottom: 18px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      color: #c9c9d2;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8b5cf6;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      height: 53px;
+      padding: 0 14px 0 42px;
+      outline: none;
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      border-radius: 14px;
+      background: #0b0b10;
+      border: 1px solid rgba(255,255,255,.08);
+      transition: .2s;
+    }
+
+    input:focus {
+      border-color: rgba(168,85,247,.55);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.08);
+    }
+
+    input::placeholder {
+      color: #5f5f6a;
+    }
+
+    .amount-hint {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .submit-button {
+      width: 100%;
+      height: 54px;
+      margin-top: 4px;
+      border: 0;
+      border-radius: 15px;
+      color: white;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      background:
+        linear-gradient(
+          135deg,
+          var(--purple),
+          var(--purple2)
+        );
+      box-shadow: 0 10px 25px rgba(124,58,237,.20);
+      transition: .2s;
+    }
+
+    .submit-button:active {
+      transform: scale(.98);
+    }
+
+    .submit-button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .submit-button i {
+      margin-right: 8px;
+    }
+
+    /* ALERT */
+
+    .alert {
+      display: none;
+      margin-bottom: 15px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .alert.error {
+      color: #fca5a5;
+      background: rgba(239,68,68,.07);
+      border: 1px solid rgba(239,68,68,.18);
+    }
+
+    .alert.success {
+      color: #86efac;
+      background: rgba(34,197,94,.07);
+      border: 1px solid rgba(34,197,94,.18);
+    }
+
+    /* SUCCESS */
+
+    .success-card {
+      display: none;
+      padding: 30px 20px;
+      text-align: center;
+      border-radius: 21px;
+      background: var(--card);
+      border: 1px solid rgba(34,197,94,.18);
+    }
+
+    .success-icon {
+      width: 65px;
+      height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 17px;
+      border-radius: 20px;
+      color: #86efac;
+      background: rgba(34,197,94,.10);
+      border: 1px solid rgba(34,197,94,.16);
+      font-size: 25px;
+    }
+
+    .success-card h2 {
+      margin-bottom: 8px;
+      font-size: 19px;
+    }
+
+    .success-card p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .success-id {
+      margin: 18px 0;
+      padding: 13px;
+      border-radius: 13px;
+      color: #d8b4fe;
+      background: rgba(124,58,237,.08);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      word-break: break-all;
+    }
+
+    .secondary-button {
+      display: block;
+      width: 100%;
+      height: 50px;
+      padding-top: 16px;
+      color: white;
+      text-decoration: none;
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* BOTTOM NAV */
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 100;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 590px;
+      height: 68px;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: rgba(15,15,21,.94);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(168,85,247,.17);
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.45);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      color: #777783;
+      text-decoration: none;
+      border-radius: 15px;
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #d8b4fe;
+      background: rgba(124,58,237,.12);
+    }
+
+    /* LOADING */
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 100px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(168,85,247,.2);
+      border-top-color: var(--violet);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+      <div class="brand">
+
+        <img
+          src="logo.png"
+          class="brand-logo"
+          alt="OSMO"
+        >
+
+        <div>
+          <div class="brand-name">OSMO</div>
+          <div class="brand-subtitle">
+            Dépôt
+          </div>
+        </div>
+
+      </div>
+
+      <a
+        href="dashboard.html"
+        class="back-button"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+
+    </header>
+
+
+    <!-- TITRE -->
+
+    <section class="title">
+
+      <h1>Effectuer un dépôt</h1>
+
+      <p>
+        Rechargez votre solde OSMO pour pouvoir acheter
+        vos produits d'investissement.
+      </p>
+
+    </section>
+
+
+    <!-- MOYEN DE PAIEMENT -->
+
+    <section class="payment-card">
+
+      <div class="payment-title">
+
+        <div class="payment-icon">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+
+        <div>
+          <h2>Informations de paiement</h2>
+          <p>Utilisez les informations ci-dessous</p>
+        </div>
+
+      </div>
+
+
+      <div class="operator-box">
+
+        <div class="operator-label">
+          Opérateur
+        </div>
+
+        <div class="operator-value">
+
+          <div
+            class="operator-name"
+            id="operatorName"
+          >
+            Chargement...
+          </div>
+
+          <div
+            class="deposit-phone"
+            id="depositPhone"
+          >
+            ...
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- INSTRUCTIONS -->
+
+    <section class="instruction">
+
+      <div class="instruction-title">
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        Comment effectuer le dépôt ?
+
+      </div>
+
+      <ol>
+        <li>
+          Envoyez le montant souhaité au numéro affiché ci-dessus.
+        </li>
+
+        <li>
+          Utilisez votre propre numéro comme numéro du payeur.
+        </li>
+
+        <li>
+          Indiquez exactement le montant envoyé.
+        </li>
+
+        <li>
+          Validez ensuite votre demande de dépôt.
+        </li>
+
+        <li>
+          Votre demande sera examinée avant crédit du solde.
+        </li>
+      </ol>
+
+    </section>
+
+
+    <!-- ALERT -->
+
+    <div
+      class="alert error"
+      id="errorAlert"
+    ></div>
+
+    <div
+      class="alert success"
+      id="successAlert"
+    ></div>
+
+
+    <!-- FORMULAIRE -->
+
+    <section
+      class="form-card"
+      id="formCard"
+    >
+
+      <div class="form-title">
+        Détails du dépôt
+      </div>
+
+
+      <form id="depositForm">
+
+        <div class="field">
+
+          <label for="amount">
+            Montant du dépôt
+          </label>
+
+          <div class="input-wrap">
+
+            <i
+              class="fa-solid fa-money-bill-wave input-icon"
+            ></i>
+
+            <input
+              type="number"
+              id="amount"
+              min="3000"
+              step="1"
+              placeholder="Ex : 5000"
+              required
+            >
+
+          </div>
+
+          <div class="amount-hint">
+
+            <span>
+              Minimum
+            </span>
+
+            <strong id="minimumAmount">
+              Chargement...
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="payerPhone">
+            Numéro ayant effectué le paiement
+          </label>
+
+          <div class="input-wrap">
+
+            <i
+              class="fa-solid fa-phone input-icon"
+            ></i>
+
+            <input
+              type="tel"
+              id="payerPhone"
+              inputmode="numeric"
+              maxlength="10"
+              placeholder="10 chiffres"
+              required
+            >
+
+          </div>
+
+          <div class="amount-hint">
+
+            <span>
+              Côte d'Ivoire
+            </span>
+
+            <span>
+              10 chiffres
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="submit-button"
+          id="submitButton"
+        >
+
+          <i class="fa-solid fa-paper-plane"></i>
+
+          ENVOYER LA DEMANDE
+
+        </button>
+
+      </form>
+
+    </section>
+
+
+    <!-- SUCCÈS -->
+
+    <section
+      class="success-card"
+      id="successCard"
+    >
+
+      <div class="success-icon">
+
+        <i class="fa-solid fa-check"></i>
+
+      </div>
+
+      <h2>
+        Demande envoyée
+      </h2>
+
+      <p>
+        Votre demande de dépôt a bien été enregistrée.
+        Le montant sera crédité après validation.
+      </p>
+
+      <div
+        class="success-id"
+        id="transactionId"
+      ></div>
+
+      <a
+        href="mes-depots.html"
+        class="secondary-button"
+      >
+        VOIR MES DÉPÔTS
+      </a>
+
+    </section>
+
+  </main>
+
+
+  <!-- MENU BAS -->
+
+  <nav class="bottom-nav">
+
+    <a
+      href="dashboard.html"
+      class="nav-item"
+    >
+      <i class="fa-solid fa-house"></i>
+      <span>Accueil</span>
+    </a>
+
+    <a
+      href="produits.html"
+      class="nav-item"
+    >
+      <i class="fa-solid fa-box"></i>
+      <span>Produit</span>
+    </a>
+
+    <a
+      href="equipe.html"
+      class="nav-item"
+    >
+      <i class="fa-solid fa-users"></i>
+      <span>Équipe</span>
+    </a>
+
+    <a
+      href="compte.html"
+      class="nav-item"
+    >
+      <i class="fa-solid fa-user"></i>
+      <span>Profil</span>
+    </a>
+
+  </nav>
+
+
+  <script>
+
+    /* =========================================================
+       OSMO — CONFIGURATION SUPABASE
+       ========================================================= */
+
+    const SUPABASE_URL =
+      "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    /* =========================================================
+       SESSION
+       ========================================================= */
+
+    const sessionToken =
+      localStorage.getItem(
+        "osmo_session_token"
+      );
+
+
+    if (!sessionToken) {
+
+      window.location.href =
+        "connexion.html";
+
+    }
+
+
+    /* =========================================================
+       ELEMENTS
+       ========================================================= */
+
+    const operatorName =
+      document.getElementById(
+        "operatorName"
+      );
+
+    const depositPhone =
+      document.getElementById(
+        "depositPhone"
+      );
+
+    const minimumAmount =
+      document.getElementById(
+        "minimumAmount"
+      );
+
+    const amountInput =
+      document.getElementById(
+        "amount"
+      );
+
+    const payerPhoneInput =
+      document.getElementById(
+        "payerPhone"
+      );
+
+    const depositForm =
+      document.getElementById(
+        "depositForm"
+      );
+
+    const submitButton =
+      document.getElementById(
+        "submitButton"
+      );
+
+    const errorAlert =
+      document.getElementById(
+        "errorAlert"
+      );
+
+    const successAlert =
+      document.getElementById(
+        "successAlert"
+      );
+
+    const formCard =
+      document.getElementById(
+        "formCard"
+      );
+
+    const successCard =
+      document.getElementById(
+        "successCard"
+      );
+
+    const transactionId =
+      document.getElementById(
+        "transactionId"
+      );
+
+
+    let platformSettings = {
+      min_deposit: 3000,
+      deposit_operator: "WAVE",
+      deposit_phone: ""
+    };
+
+
+    /* =========================================================
+       FORMATAGE
+       ========================================================= */
+
+    function money(value) {
+
+      return new Intl.NumberFormat(
+        "fr-FR"
+      ).format(
+        Number(value || 0)
+      );
+
+    }
+
+
+    /* =========================================================
+       ALERTES
+       ========================================================= */
+
+    function showError(message) {
+
+      successAlert.style.display =
+        "none";
+
+      errorAlert.textContent =
+        message;
+
+      errorAlert.style.display =
+        "block";
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+
+
+    function showSuccess(message) {
+
+      errorAlert.style.display =
+        "none";
+
+      successAlert.textContent =
+        message;
+
+      successAlert.style.display =
+        "block";
+
+    }
+
+
+    /* =========================================================
+       CHARGEMENT DES PARAMETRES
+       ========================================================= */
+
+    async function loadSettings() {
+
+      try {
+
+        const {
+          data,
+          error
+        } =
+          await supabaseClient.rpc(
+            "public_settings"
+          );
+
+
+        if (error) {
+          throw error;
+        }
+
+
+        /*
+         * public_settings retourne les paramètres
+         * publics de la plateforme.
+         */
+
+        if (data) {
+
+          platformSettings =
+            {
+              ...platformSettings,
+              ...data
+            };
+
+        }
+
+
+        const minimum =
+          Number(
+            platformSettings.min_deposit ||
+            3000
+          );
+
+
+        operatorName.textContent =
+          platformSettings.deposit_operator ||
+          "WAVE";
+
+
+        depositPhone.textContent =
+          platformSettings.deposit_phone ||
+          "—";
+
+
+        minimumAmount.textContent =
+          `${money(minimum)} XOF`;
+
+
+        amountInput.min =
+          minimum;
+
+
+      } catch (error) {
+
+        console.error(
+          "Erreur paramètres :",
+          error
+        );
+
+
+        /*
+         * Les valeurs de secours correspondent
+         * aux paramètres OSMO actuels.
+         */
+
+        operatorName.textContent =
+          "WAVE";
+
+        depositPhone.textContent =
+          "0787370732";
+
+        minimumAmount.textContent =
+          "3 000 XOF";
+
+        amountInput.min =
+          3000;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       NETTOYAGE NUMERO
+       ========================================================= */
+
+    payerPhoneInput.addEventListener(
+      "input",
+      () => {
+
+        payerPhoneInput.value =
+          payerPhoneInput.value
+            .replace(/\D/g, "")
+            .slice(0, 10);
+
+      }
+    );
+
+
+    /* =========================================================
+       ENVOI DU DEPOT
+       ========================================================= */
+
+    depositForm.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+
+        errorAlert.style.display =
+          "none";
+
+        successAlert.style.display =
+          "none";
+
+
+        const amount =
+          Number(
+            amountInput.value
+          );
+
+
+        const payerPhone =
+          payerPhoneInput.value
+            .trim();
+
+
+        const minimum =
+          Number(
+            platformSettings.min_deposit ||
+            3000
+          );
+
+
+        /* Vérification montant */
+
+        if (
+          !Number.isFinite(amount) ||
+          amount < minimum
+        ) {
+
+          showError(
+            `Le montant minimum du dépôt est de ${money(minimum)} XOF.`
+          );
+
+          return;
+
+        }
+
+
+        /* Vérification numéro */
+
+        if (
+          !/^\d{10}$/.test(
+            payerPhone
+          )
+        ) {
+
+          showError(
+            "Le numéro du payeur doit contenir exactement 10 chiffres."
+          );
+
+          return;
+
+        }
+
+
+        submitButton.disabled =
+          true;
+
+        submitButton.innerHTML = `
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          ENREGISTREMENT...
+        `;
+
+
+        try {
+
+          /*
+           * RPC sécurisé OSMO :
+           *
+           * create_my_deposit(
+           *   p_session_token,
+           *   p_amount,
+           *   p_payer_phone,
+           *   p_proof_path
+           * )
+           */
+
+          const {
+            data,
+            error
+          } =
+            await supabaseClient.rpc(
+              "create_my_deposit",
+              {
+                p_session_token:
+                  sessionToken,
+
+                p_amount:
+                  amount,
+
+                p_payer_phone:
+                  payerPhone,
+
+                p_proof_path:
+                  null
+              }
+            );
+
+
+          if (error) {
+            throw error;
+          }
+
+
+          /* Succès */
+
+          formCard.style.display =
+            "none";
+
+
+          successCard.style.display =
+            "block";
+
+
+          transactionId.innerHTML = `
+            Demande enregistrée<br>
+            <strong>${data || "Dépôt créé"}</strong>
+          `;
+
+
+          showSuccess(
+            "Votre demande de dépôt a été enregistrée."
+          );
+
+
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+
+
+        } catch (error) {
+
+          console.error(
+            "Erreur dépôt :",
+            error
+          );
+
+
+          let message =
+            "Impossible d'enregistrer la demande de dépôt.";
+
+
+          if (
+            error &&
+            error.message
+          ) {
+
+            message =
+              error.message;
+
+          }
+
+
+          showError(
+            message
+          );
+
+
+          submitButton.disabled =
+            false;
+
+          submitButton.innerHTML = `
+            <i class="fa-solid fa-paper-plane"></i>
+            ENVOYER LA DEMANDE
+          `;
+
+        }
+
+      }
+    );
+
+
+    /* =========================================================
+       INITIALISATION
+       ========================================================= */
+
+    loadSettings();
+
+  </script>
+
+</body>
+</html>
