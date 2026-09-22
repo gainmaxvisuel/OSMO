@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>OSMO — Modifier le mot de passe</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(124, 58, 237, .18),
+          transparent 35%
+        ),
+        radial-gradient(
+          circle at top left,
+          rgba(91, 33, 182, .10),
+          transparent 30%
+        ),
+        #050507;
+      color: #f7f7fa;
+      font-family: Inter, sans-serif;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 620px;
+      margin: auto;
+      padding: 18px 16px 40px;
+    }
+
+    /* HEADER */
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .back-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      border: 1px solid #24242d;
+      background: #0d0d12;
+      color: #c4c4cc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .back-button:active {
+      background: #15151c;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 11px;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: .4px;
+    }
+
+    .brand-subtitle {
+      color: #777783;
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    /* TITRE */
+
+    .page-title {
+      margin-bottom: 22px;
+    }
+
+    .page-title h1 {
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .page-title p {
+      margin-top: 7px;
+      color: #858590;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* CARD */
+
+    .password-card {
+      background: linear-gradient(
+        145deg,
+        #111116,
+        #09090d
+      );
+      border: 1px solid rgba(139, 92, 246, .22);
+      border-radius: 21px;
+      padding: 20px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, .30);
+    }
+
+    .security-header {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 23px;
+    }
+
+    .security-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      background: rgba(124, 58, 237, .13);
+      border: 1px solid rgba(139, 92, 246, .24);
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .security-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .security-description {
+      margin-top: 4px;
+      color: #777783;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* FORM */
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b9b9c2;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666671;
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .field input {
+      width: 100%;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid #25252e;
+      background: #09090e;
+      color: #f4f4f7;
+      outline: none;
+      padding: 0 46px 0 40px;
+      font-family: inherit;
+      font-size: 13px;
+      transition: .2s;
+    }
+
+    .field input:focus {
+      border-color: rgba(139, 92, 246, .65);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, .09);
+    }
+
+    .field input::placeholder {
+      color: #4f4f59;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 0;
+      background: transparent;
+      color: #666671;
+      cursor: pointer;
+      font-size: 14px;
+      width: 28px;
+      height: 28px;
+    }
+
+    .toggle-password:hover {
+      color: #a78bfa;
+    }
+
+    /* INFO */
+
+    .password-info {
+      display: flex;
+      gap: 10px;
+      padding: 13px;
+      margin: 5px 0 20px;
+      background: rgba(124, 58, 237, .06);
+      border: 1px solid rgba(139, 92, 246, .13);
+      border-radius: 13px;
+      color: #858590;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .password-info i {
+      color: #a78bfa;
+      margin-top: 2px;
+    }
+
+    /* BUTTON */
+
+    .submit-button {
+      width: 100%;
+      height: 53px;
+      border: 0;
+      border-radius: 14px;
+      background: linear-gradient(
+        135deg,
+        #7c3aed,
+        #6d28d9
+      );
+      color: white;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(124, 58, 237, .20);
+      transition: .2s;
+    }
+
+    .submit-button:active {
+      transform: scale(.985);
+    }
+
+    .submit-button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .submit-button i {
+      margin-right: 7px;
+    }
+
+    /* MESSAGE */
+
+    .message {
+      display: none;
+      margin-bottom: 15px;
+      padding: 13px 14px;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .message.success {
+      display: block;
+      color: #c4b5fd;
+      background: rgba(124, 58, 237, .10);
+      border: 1px solid rgba(139, 92, 246, .22);
+    }
+
+    .message.error {
+      display: block;
+      color: #fca5a5;
+      background: rgba(127, 29, 29, .16);
+      border: 1px solid rgba(248, 113, 113, .20);
+    }
+
+    /* FOOTER */
+
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      color: #4f4f59;
+      font-size: 10px;
+    }
+
+    @media (max-width: 390px) {
+      .page {
+        padding-left: 13px;
+        padding-right: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <header class="header">
+
+      <a
+        href="compte.html"
+        class="back-button"
+        aria-label="Retour"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+
+      <div class="brand">
+
+        <img
+          src="logo.png"
+          alt="OSMO"
+        >
+
+        <div>
+          <div class="brand-title">
+            OSMO
+          </div>
+
+          <div class="brand-subtitle">
+            Sécurité du compte
+          </div>
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="page-title">
+
+      <h1>
+        Modifier le mot de passe
+      </h1>
+
+      <p>
+        Mettez à jour le mot de passe utilisé pour vous connecter à votre compte OSMO.
+      </p>
+
+    </section>
+
+    <div
+      id="message"
+      class="message"
+    ></div>
+
+    <section class="password-card">
+
+      <div class="security-header">
+
+        <div class="security-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <div>
+
+          <div class="security-title">
+            Nouveau mot de passe
+          </div>
+
+          <div class="security-description">
+            Choisissez un mot de passe personnel et sécurisé.
+          </div>
+
+        </div>
+
+      </div>
+
+      <form id="passwordForm">
+
+        <!-- MOT DE PASSE ACTUEL -->
+
+        <div class="field">
+
+          <label for="currentPassword">
+            Mot de passe actuel
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-key input-icon"></i>
+
+            <input
+              type="password"
+              id="currentPassword"
+              autocomplete="current-password"
+              placeholder="Votre mot de passe actuel"
+              required
+            >
+
+            <button
+              type="button"
+              class="toggle-password"
+              data-target="currentPassword"
+              aria-label="Afficher le mot de passe"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- NOUVEAU MOT DE PASSE -->
+
+        <div class="field">
+
+          <label for="newPassword">
+            Nouveau mot de passe
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-lock input-icon"></i>
+
+            <input
+              type="password"
+              id="newPassword"
+              autocomplete="new-password"
+              placeholder="Votre nouveau mot de passe"
+              required
+            >
+
+            <button
+              type="button"
+              class="toggle-password"
+              data-target="newPassword"
+              aria-label="Afficher le mot de passe"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- CONFIRMATION -->
+
+        <div class="field">
+
+          <label for="confirmPassword">
+            Confirmer le nouveau mot de passe
+          </label>
+
+          <div class="input-wrapper">
+
+            <i class="fa-solid fa-check input-icon"></i>
+
+            <input
+              type="password"
+              id="confirmPassword"
+              autocomplete="new-password"
+              placeholder="Confirmez votre nouveau mot de passe"
+              required
+            >
+
+            <button
+              type="button"
+              class="toggle-password"
+              data-target="confirmPassword"
+              aria-label="Afficher le mot de passe"
+            >
+              <i class="fa-solid fa-eye"></i>
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="password-info">
+
+          <i class="fa-solid fa-shield-halved"></i>
+
+          <span>
+            Votre nouveau mot de passe doit être différent de l'ancien.
+            Ne le communiquez à personne.
+          </span>
+
+        </div>
+
+        <button
+          type="submit"
+          class="submit-button"
+          id="submitButton"
+        >
+          <i class="fa-solid fa-key"></i>
+          Modifier le mot de passe
+        </button>
+
+      </form>
+
+    </section>
+
+    <div class="footer">
+      OSMO — Sécurité de votre compte
+    </div>
+
+  </main>
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const sessionToken =
+      localStorage.getItem("osmo_session_token");
+
+    if (!sessionToken) {
+      window.location.href = "connexion.html";
+    }
+
+    const form =
+      document.getElementById("passwordForm");
+
+    const submitButton =
+      document.getElementById("submitButton");
+
+    const message =
+      document.getElementById("message");
+
+
+    function showMessage(text, type) {
+
+      message.textContent = text;
+
+      message.className =
+        "message " + type;
+
+    }
+
+
+    function clearMessage() {
+
+      message.textContent = "";
+
+      message.className =
+        "message";
+
+    }
+
+
+    /* AFFICHER / MASQUER */
+
+    document
+      .querySelectorAll(".toggle-password")
+      .forEach(button => {
+
+        button.addEventListener("click", () => {
+
+          const targetId =
+            button.dataset.target;
+
+          const input =
+            document.getElementById(targetId);
+
+          const icon =
+            button.querySelector("i");
+
+          if (input.type === "password") {
+
+            input.type = "text";
+
+            icon.className =
+              "fa-solid fa-eye-slash";
+
+          } else {
+
+            input.type = "password";
+
+            icon.className =
+              "fa-solid fa-eye";
+
+          }
+
+        });
+
+      });
+
+
+    /* MODIFICATION */
+
+    form.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        clearMessage();
+
+        const currentPassword =
+          document
+            .getElementById("currentPassword")
+            .value;
+
+        const newPassword =
+          document
+            .getElementById("newPassword")
+            .value;
+
+        const confirmPassword =
+          document
+            .getElementById("confirmPassword")
+            .value;
+
+
+        if (!currentPassword) {
+
+          showMessage(
+            "Veuillez saisir votre mot de passe actuel.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (!newPassword) {
+
+          showMessage(
+            "Veuillez saisir votre nouveau mot de passe.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (newPassword.length < 6) {
+
+          showMessage(
+            "Le nouveau mot de passe doit contenir au moins 6 caractères.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (newPassword !== confirmPassword) {
+
+          showMessage(
+            "Les deux nouveaux mots de passe ne correspondent pas.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        if (currentPassword === newPassword) {
+
+          showMessage(
+            "Le nouveau mot de passe doit être différent de l'ancien.",
+            "error"
+          );
+
+          return;
+        }
+
+
+        submitButton.disabled = true;
+
+        submitButton.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Modification...';
+
+
+        try {
+
+          /*
+           * Vérification du mot de passe actuel
+           * via la fonction de connexion existante.
+           */
+
+          const loginResult =
+            await supabaseClient.rpc(
+              "login_user_secure",
+              {
+                p_phone:
+                  localStorage.getItem("osmo_phone"),
+
+                p_password:
+                  currentPassword
+              }
+            );
+
+
+          if (loginResult.error) {
+            throw loginResult.error;
+          }
+
+
+          if (
+            !loginResult.data ||
+            loginResult.data.success !== true
+          ) {
+
+            throw new Error(
+              "MOT_DE_PASSE_ACTUEL_INCORRECT"
+            );
+
+          }
+
+
+          /*
+           * Le mot de passe actuel est valide.
+           * On applique maintenant le nouveau mot de passe
+           * à la session OSMO actuelle.
+           */
+
+          const result =
+            await supabaseClient.rpc(
+              "set_user_password",
+              {
+                p_session_token:
+                  sessionToken,
+
+                p_new_password:
+                  newPassword
+              }
+            );
+
+
+          if (result.error) {
+            throw result.error;
+          }
+
+
+          showMessage(
+            "Votre mot de passe a été modifié avec succès.",
+            "success"
+          );
+
+
+          form.reset();
+
+
+          setTimeout(() => {
+
+            window.location.href =
+              "compte.html";
+
+          }, 1400);
+
+
+        } catch (error) {
+
+          console.error(
+            "Erreur modification mot de passe :",
+            error
+          );
+
+
+          let errorMessage =
+            "Impossible de modifier le mot de passe.";
+
+
+          if (
+            error.message ===
+            "MOT_DE_PASSE_ACTUEL_INCORRECT"
+          ) {
+
+            errorMessage =
+              "Le mot de passe actuel est incorrect.";
+
+          }
+
+
+          showMessage(
+            errorMessage,
+            "error"
+          );
+
+
+        } finally {
+
+          submitButton.disabled = false;
+
+          submitButton.innerHTML =
+            '<i class="fa-solid fa-key"></i> Modifier le mot de passe';
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
