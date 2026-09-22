@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>OSMO — Transactions</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(111, 0, 255, .22),
+          transparent 38%
+        ),
+        #050505;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      width: min(94%, 560px);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(146,67,255,.35);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-subtitle {
+      color: #85858e;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .hero {
+      margin: 10px 0 20px;
+    }
+
+    .hero h1 {
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .hero p {
+      color: #91919a;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card {
+      padding: 16px;
+      border-radius: 17px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .summary-label {
+      color: #80808a;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      font-weight: 600;
+    }
+
+    .summary-value {
+      margin-top: 7px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .summary-value.purple {
+      color: #ae61ff;
+    }
+
+    .summary-value.green {
+      color: #65dca8;
+    }
+
+    .message {
+      display: none;
+      padding: 13px;
+      margin-bottom: 15px;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(220,40,70,.09);
+      border: 1px solid rgba(220,40,70,.18);
+      color: #ff8b9a;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0 12px;
+    }
+
+    .section-title h2 {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .transaction-card {
+      padding: 16px;
+      margin-bottom: 10px;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .transaction-card.deposit-request {
+      border-color: rgba(174,97,255,.20);
+    }
+
+    .transaction-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .transaction-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .transaction-icon {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(143,66,255,.10);
+      border: 1px solid rgba(143,66,255,.18);
+      color: #ae61ff;
+    }
+
+    .transaction-icon.pending {
+      color: #e0b45c;
+      background: rgba(224,180,92,.08);
+      border-color: rgba(224,180,92,.16);
+    }
+
+    .transaction-icon.approved {
+      color: #63dda8;
+      background: rgba(99,221,168,.08);
+      border-color: rgba(99,221,168,.16);
+    }
+
+    .transaction-icon.rejected {
+      color: #ff7e91;
+      background: rgba(255,126,145,.08);
+      border-color: rgba(255,126,145,.16);
+    }
+
+    .transaction-description {
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .transaction-date {
+      color: #777781;
+      font-size: 9px;
+      margin-top: 4px;
+    }
+
+    .transaction-amount {
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .transaction-amount.positive {
+      color: #63dda8;
+    }
+
+    .transaction-amount.negative {
+      color: #ff7e91;
+    }
+
+    .transaction-amount.pending {
+      color: #e0b45c;
+    }
+
+    .transaction-amount.neutral {
+      color: #c9a0ff;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 7px;
+      padding: 4px 7px;
+      border-radius: 7px;
+      font-size: 8px;
+      font-weight: 700;
+    }
+
+    .status.pending {
+      color: #e0b45c;
+      background: rgba(224,180,92,.09);
+    }
+
+    .status.approved {
+      color: #63dda8;
+      background: rgba(99,221,168,.09);
+    }
+
+    .status.rejected {
+      color: #ff7e91;
+      background: rgba(255,126,145,.09);
+    }
+
+    .status.neutral {
+      color: #aaaab4;
+      background: rgba(255,255,255,.05);
+    }
+
+    .transaction-details {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 5px 0;
+    }
+
+    .detail-label {
+      color: #777781;
+      font-size: 9px;
+    }
+
+    .detail-value {
+      color: #cfcfd5;
+      font-size: 9px;
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .empty-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 14px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9d4eff;
+      background: rgba(143,66,255,.09);
+      border: 1px solid rgba(143,66,255,.15);
+      font-size: 20px;
+    }
+
+    .empty h3 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .empty p {
+      color: #85858f;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 35px 10px;
+      color: #777781;
+      font-size: 11px;
+    }
+
+    .loading i {
+      color: #9e4dff;
+      margin-right: 6px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      height: 74px;
+      background: rgba(7,7,8,.95);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(560px,100%);
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+    }
+
+    .nav-item {
+      color: #6f6f79;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a657ff;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <header>
+    <a href="compte.html" class="back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+
+    <img
+      src="logo.png"
+      class="logo"
+      alt="OSMO"
+    >
+
+    <div>
+      <div class="header-title">OSMO</div>
+      <div class="header-subtitle">
+        Historique des opérations
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Transactions</h1>
+
+    <p>
+      Toutes vos opérations et demandes de dépôt
+      sont regroupées ici.
+    </p>
+  </section>
+
+  <div id="message" class="message"></div>
+
+  <section class="summary">
+
+    <div class="summary-card">
+      <div class="summary-label">
+        Opérations
+      </div>
+
+      <div
+        class="summary-value purple"
+        id="operationCount"
+      >
+        0
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">
+        Total crédité
+      </div>
+
+      <div
+        class="summary-value green"
+        id="creditTotal"
+      >
+        0 XOF
+      </div>
+    </div>
+
+  </section>
+
+  <div class="section-title">
+    <h2>Historique complet</h2>
+  </div>
+
+  <div id="transactionsList">
+    <div class="loading">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      Chargement de l'historique...
+    </div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+
+  <div class="nav-inner">
+
+    <a href="dashboard.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>ACCUEIL</span>
+    </a>
+
+    <a href="produits.html" class="nav-item">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>PRODUIT</span>
+    </a>
+
+    <a href="equipe.html" class="nav-item">
+      <i class="fa-solid fa-users"></i>
+      <span>ÉQUIPE</span>
+    </a>
+
+    <a href="compte.html" class="nav-item active">
+      <i class="fa-solid fa-user"></i>
+      <span>PROFIL</span>
+    </a>
+
+  </div>
+
+</nav>
+
+<script>
+
+  const SUPABASE_URL =
+    "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const sessionToken =
+    localStorage.getItem(
+      "osmo_session_token"
+    );
+
+  if (!sessionToken) {
+    window.location.href =
+      "connexion.html";
+  }
+
+  const list =
+    document.getElementById(
+      "transactionsList"
+    );
+
+  const message =
+    document.getElementById(
+      "message"
+    );
+
+  function formatMoney(value) {
+
+    return Number(value || 0)
+      .toLocaleString("fr-FR") +
+      " XOF";
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatDate(value) {
+
+    if (!value) {
+      return "—";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+
+    return date.toLocaleString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+  }
+
+  const TYPE_LABELS = {
+
+    registration_bonus:
+      "Bonus / Pointage",
+
+    deposit:
+      "Dépôt",
+
+    withdrawal:
+      "Retrait",
+
+    withdrawal_refund:
+      "Remboursement de retrait",
+
+    product_purchase:
+      "Achat de produit",
+
+    product_income:
+      "Revenu de produit",
+
+    commission:
+      "Commission de parrainage",
+
+    task_reward:
+      "Récompense de tâche"
+  };
+
+  const TYPE_ICONS = {
+
+    registration_bonus:
+      "fa-gift",
+
+    deposit:
+      "fa-arrow-down",
+
+    withdrawal:
+      "fa-arrow-up",
+
+    withdrawal_refund:
+      "fa-rotate-left",
+
+    product_purchase:
+      "fa-cart-shopping",
+
+    product_income:
+      "fa-chart-line",
+
+    commission:
+      "fa-users",
+
+    task_reward:
+      "fa-list-check"
+  };
+
+  const CREDIT_TYPES = new Set([
+
+    "registration_bonus",
+    "deposit",
+    "withdrawal_refund",
+    "product_income",
+    "commission",
+    "task_reward"
+
+  ]);
+
+  const DEBIT_TYPES = new Set([
+
+    "withdrawal",
+    "product_purchase"
+
+  ]);
+
+  function getTypeLabel(type) {
+
+    if (TYPE_LABELS[type]) {
+      return TYPE_LABELS[type];
+    }
+
+    return String(type || "Transaction")
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, letter =>
+        letter.toUpperCase()
+      );
+  }
+
+  function getIcon(type) {
+
+    return TYPE_ICONS[type] ||
+      "fa-right-left";
+  }
+
+  function getStatusLabel(status) {
+
+    switch (status) {
+
+      case "pending":
+        return "En attente";
+
+      case "approved":
+        return "Approuvé";
+
+      case "rejected":
+        return "Rejeté";
+
+      default:
+        return status || "—";
+    }
+  }
+
+  function getStatusClass(status) {
+
+    if (
+      status === "pending" ||
+      status === "approved" ||
+      status === "rejected"
+    ) {
+      return status;
+    }
+
+    return "neutral";
+  }
+
+  function getStatusIcon(status) {
+
+    switch (status) {
+
+      case "pending":
+        return "fa-clock";
+
+      case "approved":
+        return "fa-circle-check";
+
+      case "rejected":
+        return "fa-circle-xmark";
+
+      default:
+        return "fa-circle-info";
+    }
+  }
+
+  function showError(text) {
+
+    message.textContent = text;
+
+    message.className =
+      "message error";
+
+    message.style.display =
+      "block";
+  }
+
+  /*
+   * Transforme une vraie transaction
+   * en élément de l'historique global.
+   */
+  function transactionToItem(item) {
+
+    const type =
+      item.type || "";
+
+    return {
+
+      source: "transaction",
+
+      id:
+        item.id,
+
+      type:
+
+        type,
+
+      title:
+        item.description ||
+        getTypeLabel(type),
+
+      amount:
+        Number(item.amount || 0),
+
+      date:
+        item.created_at,
+
+      transactionId:
+        item.transaction_id,
+
+      referenceId:
+        item.reference_id,
+
+      status:
+        null,
+
+      payerPhone:
+        null,
+
+      operator:
+        null
+    };
+  }
+
+  /*
+   * Transforme une demande de dépôt
+   * en élément de l'historique global.
+   */
+  function depositToItem(item) {
+
+    let title;
+
+    if (item.status === "pending") {
+      title = "Demande de dépôt en attente";
+    }
+
+    else if (item.status === "approved") {
+      title = "Dépôt approuvé";
+    }
+
+    else if (item.status === "rejected") {
+      title = "Dépôt rejeté";
+    }
+
+    else {
+      title = "Demande de dépôt";
+    }
+
+    return {
+
+      source: "deposit",
+
+      id:
+        item.id,
+
+      type:
+        "deposit_request",
+
+      title:
+        title,
+
+      /*
+       * Une demande pending n'est pas encore
+       * une transaction créditée.
+       */
+      amount:
+        Number(item.amount || 0),
+
+      date:
+        item.created_at,
+
+      transactionId:
+        item.transaction_id,
+
+      referenceId:
+        null,
+
+      status:
+        item.status,
+
+      payerPhone:
+        item.payer_phone,
+
+      operator:
+        item.operator
+    };
+  }
+
+  function renderTransaction(item) {
+
+    /*
+     * ==========================
+     * DEMANDE DE DÉPÔT
+     * ==========================
+     */
+
+    if (item.source === "deposit") {
+
+      const status =
+        item.status || "pending";
+
+      const statusClass =
+        getStatusClass(status);
+
+      let amountClass =
+        "pending";
+
+      if (status === "approved") {
+        amountClass = "positive";
+      }
+
+      if (status === "rejected") {
+        amountClass = "neutral";
+      }
+
+      return `
+
+        <article class="transaction-card deposit-request">
+
+          <div class="transaction-top">
+
+            <div class="transaction-left">
+
+              <div class="transaction-icon ${statusClass}">
+                <i class="fa-solid fa-arrow-down"></i>
+              </div>
+
+              <div>
+
+                <div class="transaction-description">
+                  ${escapeHtml(item.title)}
+                </div>
+
+                <div class="transaction-date">
+                  ${formatDate(item.date)}
+                </div>
+
+                <div class="status ${statusClass}">
+                  <i class="fa-solid ${getStatusIcon(status)}"></i>
+                  ${escapeHtml(
+                    getStatusLabel(status)
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="transaction-amount ${amountClass}">
+              ${formatMoney(item.amount)}
+            </div>
+
+          </div>
+
+          <div class="transaction-details">
+
+            <div class="detail-row">
+
+              <span class="detail-label">
+                Type
+              </span>
+
+              <span class="detail-value">
+                Demande de dépôt
+              </span>
+
+            </div>
+
+            <div class="detail-row">
+
+              <span class="detail-label">
+                Opérateur
+              </span>
+
+              <span class="detail-value">
+                ${escapeHtml(
+                  item.operator || "—"
+                )}
+              </span>
+
+            </div>
+
+            <div class="detail-row">
+
+              <span class="detail-label">
+                Numéro payeur
+              </span>
+
+              <span class="detail-value">
+                ${escapeHtml(
+                  item.payerPhone || "—"
+                )}
+              </span>
+
+            </div>
+
+            <div class="detail-row">
+
+              <span class="detail-label">
+                Référence
+              </span>
+
+              <span class="detail-value">
+                ${escapeHtml(
+                  item.transactionId || "—"
+                )}
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      `;
+    }
+
+    /*
+     * ==========================
+     * TRANSACTION FINANCIÈRE
+     * ==========================
+     */
+
+    const type =
+      item.type || "";
+
+    const amount =
+      Number(item.amount || 0);
+
+    let amountClass =
+      "neutral";
+
+    let prefix =
+      "";
+
+    if (CREDIT_TYPES.has(type)) {
+
+      amountClass =
+        "positive";
+
+      prefix =
+        "+";
+    }
+
+    else if (DEBIT_TYPES.has(type)) {
+
+      amountClass =
+        "negative";
+
+      prefix =
+        "−";
+    }
+
+    else {
+
+      if (amount > 0) {
+
+        amountClass =
+          "positive";
+
+        prefix =
+          "+";
+
+      } else if (amount < 0) {
+
+        amountClass =
+          "negative";
+
+        prefix =
+          "−";
+      }
+    }
+
+    return `
+
+      <article class="transaction-card">
+
+        <div class="transaction-top">
+
+          <div class="transaction-left">
+
+            <div class="transaction-icon">
+
+              <i class="fa-solid ${getIcon(type)}"></i>
+
+            </div>
+
+            <div>
+
+              <div class="transaction-description">
+                ${escapeHtml(item.title)}
+              </div>
+
+              <div class="transaction-date">
+                ${formatDate(item.date)}
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="transaction-amount ${amountClass}">
+            ${prefix}${formatMoney(
+              Math.abs(amount)
+            )}
+          </div>
+
+        </div>
+
+        <div class="transaction-details">
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Type
+            </span>
+
+            <span class="detail-value">
+              ${escapeHtml(
+                getTypeLabel(type)
+              )}
+            </span>
+
+          </div>
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Transaction
+            </span>
+
+            <span class="detail-value">
+              ${escapeHtml(
+                item.transactionId ||
+                "—"
+              )}
+            </span>
+
+          </div>
+
+          ${
+            item.referenceId
+              ? `
+                <div class="detail-row">
+
+                 <span class="detail-label">
+                    Référence
+                  </span>
+
+                  <span class="detail-value">
+                    ${escapeHtml(
+                      item.referenceId
+                    )}
+                  </span>
+
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
+      </article>
+
+    `;
+  }
+
+  async function loadHistory() {
+
+    /*
+     * Les deux appels sont indépendants :
+     *
+     * 1. transactions
+     * 2. demandes de dépôt
+     */
+
+    const [
+      transactionsResult,
+      depositsResult
+    ] = await Promise.all([
+
+      supabaseClient.rpc(
+        "user_transactions",
+        {
+          p_session_token:
+            sessionToken
+        }
+      ),
+
+      supabaseClient.rpc(
+        "my_deposits",
+        {
+          p_session_token:
+            sessionToken
+        }
+      )
+
+    ]);
+
+    if (transactionsResult.error) {
+
+      console.error(
+        "Erreur transactions:",
+        transactionsResult.error
+      );
+
+      throw new Error(
+        transactionsResult.error.message
+      );
+    }
+
+    if (depositsResult.error) {
+
+      console.error(
+        "Erreur dépôts:",
+        depositsResult.error
+      );
+
+      throw new Error(
+        depositsResult.error.message
+      );
+    }
+
+    const transactions =
+      Array.isArray(
+        transactionsResult.data
+      )
+        ? transactionsResult.data
+        : [];
+
+    const deposits =
+      Array.isArray(
+        depositsResult.data
+      )
+        ? depositsResult.data
+        : [];
+
+    /*
+     * Conversion vers l'historique global.
+     */
+
+    const transactionItems =
+      transactions.map(
+        transactionToItem
+      );
+
+    const depositItems =
+      deposits.map(
+        depositToItem
+      );
+
+    /*
+     * Fusion des deux sources.
+     */
+
+    const allItems = [
+
+      ...transactionItems,
+      ...depositItems
+
+    ];
+
+    /*
+     * Tri global par date :
+     * plus récent en premier.
+     */
+
+    allItems.sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime()
+    );
+
+    document.getElementById(
+      "operationCount"
+    ).textContent =
+      allItems.length;
+
+    /*
+     * Le total crédité provient uniquement
+     * des vraies transactions positives.
+     *
+     * Une demande pending ne crédite pas
+     * encore le compte.
+     */
+
+    const creditTotal =
+      transactions.reduce(
+        (sum, item) => {
+
+          const type =
+            item.type || "";
+
+          if (
+            CREDIT_TYPES.has(type)
+          ) {
+
+            return sum +
+              Math.abs(
+                Number(
+                  item.amount || 0
+                )
+              );
+          }
+
+          return sum;
+
+        },
+        0
+      );
+
+    document.getElementById(
+      "creditTotal"
+    ).textContent =
+      formatMoney(creditTotal);
+
+    if (!allItems.length) {
+
+      list.innerHTML = `
+
+        <div class="empty">
+
+          <div class="empty-icon">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+
+          <h3>Aucune opération</h3>
+
+          <p>
+            Aucune transaction ou demande de dépôt
+            n'est encore enregistrée.
+          </p>
+
+        </div>
+
+      `;
+
+      return;
+    }
+
+    list.innerHTML =
+      allItems
+        .map(renderTransaction)
+        .join("");
+  }
+
+  async function initialize() {
+
+    if (!sessionToken) {
+      return;
+    }
+
+    try {
+
+      await loadHistory();
+
+    } catch (error) {
+
+      console.error(
+        "Erreur historique:",
+        error
+      );
+
+      list.innerHTML = "";
+
+      showError(
+        error.message ||
+        "Impossible de charger l'historique."
+      );
+    }
+  }
+
+  initialize();
+
+</script>
+
+</body>
+</html>
