@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>OSMO — Tâches</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #07020f;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 90px;
+    }
+
+    .header {
+      padding: 24px 20px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: #0b0415;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin-top: 5px;
+      color: #9f94ad;
+      font-size: 13px;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .summary {
+      background: linear-gradient(135deg, #16052a, #10071c);
+      border: 1px solid rgba(180,95,255,.18);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .summary-label {
+      color: #a99db4;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .summary-count {
+      font-size: 32px;
+      font-weight: 800;
+      color: #c58cff;
+    }
+
+    .summary-text {
+      margin-top: 6px;
+      color: #bdb2c8;
+      font-size: 13px;
+    }
+
+    .task-card {
+      background: #100719;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 19px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: #9b4dff;
+    }
+
+    .task-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .task-title {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .reward {
+      white-space: nowrap;
+      color: #d7a8ff;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .progress {
+      margin-top: 14px;
+      height: 7px;
+      background: #25132f;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #7133b8, #b55cff);
+      border-radius: 20px;
+      transition: width .4s ease;
+    }
+
+    .task-info {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 9px;
+      font-size: 12px;
+      color: #9f94aa;
+    }
+
+    .task-status {
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .eligible {
+      color: #65e6a8;
+    }
+
+    .progressing {
+      color: #aaa0b0;
+    }
+
+    .claimed {
+      color: #8e8395;
+    }
+
+    .claim-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px;
+      margin-top: 15px;
+      background: #8b42d8;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .claim-btn:disabled {
+      background: #302236;
+      color: #756a7b;
+      cursor: not-allowed;
+    }
+
+    .empty,
+    .loading {
+      text-align: center;
+      padding: 45px 20px;
+      color: #9f94aa;
+      font-size: 14px;
+    }
+
+    .error {
+      text-align: center;
+      padding: 25px 15px;
+      color: #ff8d8d;
+      font-size: 14px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 72px;
+      background: rgba(11,4,21,.97);
+      border-top: 1px solid rgba(255,255,255,.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      text-decoration: none;
+      color: #83798c;
+      font-size: 10px;
+      text-align: center;
+      min-width: 65px;
+    }
+
+    .nav-item .icon {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item.active {
+      color: #c68cff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="header-top">
+      <img src="logo.png" class="logo" alt="OSMO">
+      <div>
+        <h1>Tâches</h1>
+        <p>Atteignez vos objectifs et réclamez vos récompenses.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <div class="summary">
+      <div class="summary-label">FILLEULS INVESTISSEURS</div>
+      <div class="summary-count" id="investorCount">0</div>
+      <div class="summary-text">
+        Votre progression pour débloquer les récompenses de parrainage.
+      </div>
+    </div>
+
+    <div id="content">
+      <div class="loading">Chargement des tâches...</div>
+    </div>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <span class="icon">⌂</span>
+      ACCUEIL
+    </a>
+
+    <a href="produits.html" class="nav-item">
+      <span class="icon">▣</span>
+      PRODUIT
+    </a>
+
+    <a href="equipe.html" class="nav-item">
+      <span class="icon">♧</span>
+      ÉQUIPE
+    </a>
+
+    <a href="compte.html" class="nav-item">
+      <span class="icon">◉</span>
+      PROFIL
+    </a>
+  </nav>
+
+  <script>
+    const SUPABASE_URL =
+      "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const sessionToken =
+      localStorage.getItem("osmo_session_token");
+
+    const content =
+      document.getElementById("content");
+
+    const investorCount =
+      document.getElementById("investorCount");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatMoney(value) {
+      return Number(value || 0).toLocaleString("fr-FR") + " XOF";
+    }
+
+    async function loadTasks() {
+
+      if (!sessionToken) {
+        window.location.href = "connexion.html";
+        return;
+      }
+
+      content.innerHTML =
+        '<div class="loading">Chargement des tâches...</div>';
+
+      const { data, error } =
+        await supabaseClient.rpc(
+          "my_referral_rewards",
+          {
+            p_session_token: sessionToken
+          }
+        );
+
+      if (error) {
+        console.error(error);
+
+        content.innerHTML =
+          '<div class="error">Impossible de charger les tâches.</div>';
+
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        investorCount.textContent = "0";
+
+        content.innerHTML =
+          '<div class="empty">Aucune récompense configurée.</div>';
+
+        return;
+      }
+
+      const currentCount =
+        Math.max(
+          ...data.map(item =>
+            Number(item.investor_count || 0)
+          )
+        );
+
+      investorCount.textContent =
+        currentCount.toLocaleString("fr-FR");
+
+      content.innerHTML =
+        data.map((task) => {
+
+          const required =
+            Number(task.required_investors || 0);
+
+          const current =
+            Number(task.investor_count || 0);
+
+          const reward =
+            Number(task.reward_amount || 0);
+
+          let percent = 0;
+
+          if (required > 0) {
+            percent =
+              Math.min(
+                100,
+                (current / required) * 100
+              );
+          }
+
+          if (task.claimed) {
+            percent = 100;
+          }
+
+          let statusText = "";
+          let statusClass = "";
+          let disabled = "";
+          let buttonText = "RÉCLAMER";
+
+          if (task.claimed) {
+
+            statusText =
+              "Récompense déjà réclamée";
+
+            statusClass = "claimed";
+
+            disabled = "disabled";
+
+            buttonText = "DÉJÀ RÉCLAMÉ";
+
+          } else if (task.eligible) {
+
+            statusText =
+              "Objectif atteint — récompense disponible";
+
+            statusClass = "eligible";
+
+          } else {
+
+            const remaining =
+              Math.max(0, required - current);
+
+            statusText =
+              `${remaining.toLocaleString("fr-FR")} filleul(s) restant(s)`;
+
+            statusClass = "progressing";
+
+            disabled = "disabled";
+          }
+
+          return `
+            <div class="task-card">
+
+              <div class="task-head">
+
+                <div class="task-title">
+                  ${escapeHtml(task.name)}
+                </div>
+
+                <div class="reward">
+                  +${formatMoney(reward)}
+                </div>
+
+              </div>
+
+              <div class="progress">
+                <div
+                  class="progress-bar"
+                  style="width:${percent}%"
+                ></div>
+              </div>
+
+              <div class="task-info">
+                <span>
+                  ${current.toLocaleString("fr-FR")} / ${required.toLocaleString("fr-FR")}
+                </span>
+
+                <span>
+                  ${percent.toFixed(0)}%
+                </span>
+              </div>
+
+              <div class="task-status ${statusClass}">
+                ${statusText}
+              </div>
+
+              <button
+                class="claim-btn"
+                ${disabled}
+                onclick="claimReward('${task.id}', this)"
+              >
+                ${buttonText}
+              </button>
+
+            </div>
+          `;
+
+        }).join("");
+    }
+
+    async function claimReward(rewardId, button) {
+
+      button.disabled = true;
+      button.textContent = "TRAITEMENT...";
+
+      const { data, error } =
+        await supabaseClient.rpc(
+          "claim_referral_reward",
+          {
+            p_session_token: sessionToken,
+            p_reward_id: rewardId
+          }
+        );
+
+      if (error) {
+
+        console.error(error);
+
+        alert(
+          "Une erreur est survenue. Veuillez réessayer."
+        );
+
+        button.disabled = false;
+        button.textContent = "RÉCLAMER";
+
+        return;
+      }
+
+      if (!data || !data.success) {
+
+        alert(
+          data?.message ||
+          "Cette récompense ne peut pas être réclamée."
+        );
+
+        await loadTasks();
+
+        return;
+      }
+
+      alert(
+        "Récompense réclamée : +" +
+        formatMoney(data.amount)
+      );
+
+      await loadTasks();
+    }
+
+    loadTasks();
+  </script>
+
+</body>
+</html>
