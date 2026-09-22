@@ -1,0 +1,809 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>OSMO — Mes retraits</title>  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(111,0,255,.22), transparent 38%),
+        #050505;
+      color: #fff;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .container {
+      width: min(94%, 560px);
+      margin: auto;
+    }
+
+    header {
+      padding: 22px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      object-fit: cover;
+      border: 1px solid rgba(146,67,255,.35);
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .header-subtitle {
+      color: #85858e;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .hero {
+      margin: 10px 0 20px;
+    }
+
+    .hero h1 {
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .hero p {
+      color: #91919a;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .summary-card {
+      padding: 16px;
+      border-radius: 17px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .summary-label {
+      color: #80808a;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      font-weight: 600;
+    }
+
+    .summary-value {
+      margin-top: 7px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .summary-value.purple {
+      color: #ae61ff;
+    }
+
+    .summary-value.green {
+      color: #65dca8;
+    }
+
+    .message {
+      display: none;
+      padding: 13px;
+      margin-bottom: 15px;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: rgba(220,40,70,.09);
+      border: 1px solid rgba(220,40,70,.18);
+      color: #ff8b9a;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4px 0 12px;
+    }
+
+    .section-title h2 {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .new-withdrawal {
+      color: #a95bff;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .withdrawal-card {
+      padding: 17px;
+      margin-bottom: 11px;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .withdrawal-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .withdrawal-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .withdrawal-icon {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ae61ff;
+      background: rgba(143,66,255,.10);
+      border: 1px solid rgba(143,66,255,.18);
+    }
+
+    .withdrawal-amount {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .withdrawal-date {
+      color: #777781;
+      font-size: 9px;
+      margin-top: 4px;
+    }
+
+    .status {
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 8px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .status.pending {
+      color: #e7c76e;
+      background: rgba(231,199,110,.09);
+      border: 1px solid rgba(231,199,110,.15);
+    }
+
+    .status.approved {
+      color: #63dda8;
+      background: rgba(20,190,120,.09);
+      border: 1px solid rgba(20,190,120,.15);
+    }
+
+    .status.rejected {
+      color: #ff7e91;
+      background: rgba(220,40,70,.09);
+      border: 1px solid rgba(220,40,70,.15);
+    }
+
+    .details {
+      margin-top: 15px;
+      padding-top: 13px;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 6px 0;
+    }
+
+    .detail-label {
+      color: #777781;
+      font-size: 9px;
+    }
+
+    .detail-value {
+      color: #d6d6db;
+      font-size: 10px;
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .detail-value.net {
+      color: #69dca9;
+      font-weight: 800;
+    }
+
+    .detail-value.fee {
+      color: #ff9aa8;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(22,22,25,.97),
+        rgba(9,9,11,.97)
+      );
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .empty-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 14px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9d4eff;
+      background: rgba(143,66,255,.09);
+      border: 1px solid rgba(143,66,255,.15);
+      font-size: 20px;
+    }
+
+    .empty h3 {
+      font-size: 15px;
+      margin-bottom: 7px;
+    }
+
+    .empty p {
+      color: #85858f;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .empty-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 43px;
+      padding: 0 17px;
+      margin-top: 17px;
+      border-radius: 12px;
+      background: linear-gradient(135deg,#7b20e8,#a347ff);
+      color: #fff;
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 35px 10px;
+      color: #777781;
+      font-size: 11px;
+    }
+
+    .loading i {
+      color: #9e4dff;
+      margin-right: 6px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      height: 74px;
+      background: rgba(7,7,8,.95);
+      backdrop-filter: blur(18px);
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-inner {
+      width: min(560px,100%);
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+    }
+
+    .nav-item {
+      color: #6f6f79;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a657ff;
+    }
+  </style></head><body><div class="container">  <header><a href="retrait.html" class="back">
+  <i class="fa-solid fa-arrow-left"></i>
+</a>
+
+<img
+  src="logo.png"
+  class="logo"
+  alt="OSMO"
+>
+
+<div>
+  <div class="header-title">OSMO</div>
+  <div class="header-subtitle">Historique des retraits</div>
+</div>
+
+  </header>  <section class="hero"><h1>Mes retraits</h1>
+
+<p>
+  Consultez l'ensemble de vos demandes de retrait
+  et leur état de traitement.
+</p>
+
+  </section>  <div id="message" class="message"></div>  <section class="summary"><div class="summary-card">
+  <div class="summary-label">
+    Nombre de retraits
+  </div>
+
+  <div
+    class="summary-value purple"
+    id="withdrawalCount"
+  >
+    0
+  </div>
+</div>
+
+<div class="summary-card">
+  <div class="summary-label">
+    Total demandé
+  </div>
+
+  <div
+    class="summary-value green"
+    id="withdrawalTotal"
+  >
+    0 XOF
+  </div>
+</div>
+
+  </section>  <div class="section-title"><h2>Historique</h2>
+
+<a
+  href="retrait.html"
+  class="new-withdrawal"
+>
+  NOUVEAU RETRAIT
+</a>
+
+  </div>  <div id="withdrawalsList"><div class="loading">
+  <i class="fa-solid fa-spinner fa-spin"></i>
+  Chargement des retraits...
+</div>
+
+  </div></div><nav class="bottom-nav">  <div class="nav-inner"><a
+  href="dashboard.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-house"></i>
+  <span>ACCUEIL</span>
+</a>
+
+<a
+  href="produits.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-chart-line"></i>
+  <span>PRODUIT</span>
+</a>
+
+<a
+  href="equipe.html"
+  class="nav-item"
+>
+  <i class="fa-solid fa-users"></i>
+  <span>ÉQUIPE</span>
+</a>
+
+<a
+  href="compte.html"
+  class="nav-item active"
+>
+  <i class="fa-solid fa-user"></i>
+  <span>PROFIL</span>
+</a>
+
+  </div></nav><script>
+
+  const SUPABASE_URL =
+    "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+  const sessionToken =
+    localStorage.getItem("osmo_session_token");
+
+  if (!sessionToken) {
+    window.location.href = "connexion.html";
+  }
+
+  const list =
+    document.getElementById(
+      "withdrawalsList"
+    );
+
+  const message =
+    document.getElementById("message");
+
+  function formatMoney(value) {
+
+    return Number(value || 0)
+      .toLocaleString("fr-FR") +
+      " XOF";
+  }
+
+  function escapeHtml(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function formatDate(value) {
+
+    if (!value) {
+      return "—";
+    }
+
+    const date =
+      new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleString(
+      "fr-FR",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+  }
+
+  function getStatusLabel(status) {
+
+    switch (String(status || "").toLowerCase()) {
+
+      case "pending":
+        return "EN ATTENTE";
+
+      case "approved":
+        return "APPROUVÉ";
+
+      case "rejected":
+        return "REJETÉ";
+
+      default:
+        return String(status || "INCONNU")
+          .toUpperCase();
+    }
+  }
+
+  function getStatusClass(status) {
+
+    switch (String(status || "").toLowerCase()) {
+
+      case "approved":
+        return "approved";
+
+      case "rejected":
+        return "rejected";
+
+      default:
+        return "pending";
+    }
+  }
+
+  function showError(text) {
+
+    message.textContent = text;
+    message.className = "message error";
+    message.style.display = "block";
+  }
+
+  async function loadWithdrawals() {
+
+    const { data, error } =
+      await supabaseClient.rpc(
+        "my_withdrawals",
+        {
+          p_session_token:
+            sessionToken
+        }
+      );
+
+    if (error) {
+
+      console.error(error);
+
+      throw new Error(
+        error.message ||
+        "Impossible de charger vos retraits."
+      );
+    }
+
+    const withdrawals =
+      Array.isArray(data)
+        ? data
+        : [];
+
+    document.getElementById(
+      "withdrawalCount"
+    ).textContent =
+      withdrawals.length;
+
+    const total =
+      withdrawals.reduce(
+        (sum, item) =>
+          sum +
+          Number(
+            item.amount_requested || 0
+          ),
+        0
+      );
+
+    document.getElementById(
+      "withdrawalTotal"
+    ).textContent =
+      formatMoney(total);
+
+    if (!withdrawals.length) {
+
+      list.innerHTML = `
+        <div class="empty">
+
+          <div class="empty-icon">
+            <i class="fa-solid fa-money-bill-transfer"></i>
+          </div>
+
+          <h3>Aucun retrait</h3>
+
+          <p>
+            Vous n'avez encore effectué aucune
+            demande de retrait.
+          </p>
+
+          <a
+            href="retrait.html"
+            class="empty-btn"
+          >
+            EFFECTUER UN RETRAIT
+          </a>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    list.innerHTML =
+      withdrawals
+        .map(renderWithdrawal)
+        .join("");
+
+  }
+
+  function renderWithdrawal(item) {
+
+    const status =
+      getStatusClass(item.status);
+
+    const statusLabel =
+      getStatusLabel(item.status);
+
+    return `
+      <article class="withdrawal-card">
+
+        <div class="withdrawal-top">
+
+          <div class="withdrawal-left">
+
+            <div class="withdrawal-icon">
+              <i class="fa-solid fa-arrow-up-right-dots"></i>
+            </div>
+
+            <div>
+
+              <div class="withdrawal-amount">
+                ${formatMoney(
+                  item.amount_requested
+                )}
+              </div>
+
+              <div class="withdrawal-date">
+                ${formatDate(
+                  item.created_at
+                )}
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="status ${status}">
+            ${escapeHtml(statusLabel)}
+          </span>
+
+        </div>
+
+        <div class="details">
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Frais
+            </span>
+
+            <span class="detail-value fee">
+              ${formatMoney(
+                item.fee_amount
+              )}
+            </span>
+
+          </div>
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Montant net
+            </span>
+
+            <span class="detail-value net">
+              ${formatMoney(
+                item.net_amount
+              )}
+            </span>
+
+          </div>
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Compte de retrait
+            </span>
+
+            <span class="detail-value">
+              ${escapeHtml(
+                item.account_id || "—"
+              )}
+            </span>
+
+          </div>
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Transaction
+            </span>
+
+            <span class="detail-value">
+              ${escapeHtml(
+                item.transaction_id || "—"
+              )}
+            </span>
+
+          </div>
+
+          <div class="detail-row">
+
+            <span class="detail-label">
+              Traitement
+            </span>
+
+            <span class="detail-value">
+              ${formatDate(
+                item.reviewed_at
+              )}
+            </span>
+
+          </div>
+
+        </div>
+
+      </article>
+    `;
+  }
+
+  async function initialize() {
+
+    try {
+
+      await loadWithdrawals();
+
+    } catch (error) {
+
+      console.error(error);
+
+      list.innerHTML = "";
+
+      showError(
+        error.message ||
+        "Impossible de charger vos retraits."
+      );
+
+    }
+
+  }
+
+  initialize();
+
+</script></body>
+</html>
