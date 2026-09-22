@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>OSMO — Mon profil</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(124,58,237,.18), transparent 35%),
+        radial-gradient(circle at top left, rgba(91,33,182,.10), transparent 30%),
+        #050507;
+      color: #f7f7fa;
+      font-family: Inter, sans-serif;
+      padding-bottom: 92px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 620px;
+      margin: auto;
+      padding: 18px 16px 25px;
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    .brand-subtitle {
+      color: #888893;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    /* TITRE */
+    .page-title {
+      margin-bottom: 17px;
+    }
+
+    .page-title h1 {
+      font-size: 27px;
+      font-weight: 800;
+    }
+
+    .page-title p {
+      margin-top: 6px;
+      color: #8f8f9b;
+      font-size: 13px;
+    }
+
+    /* CARTE COMPTE */
+    .account-card {
+      background: linear-gradient(145deg, #111116, #09090d);
+      border: 1px solid rgba(139,92,246,.22);
+      border-radius: 20px;
+      padding: 19px;
+      margin-bottom: 16px;
+      box-shadow: 0 15px 35px rgba(0,0,0,.25);
+    }
+
+    .account-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .profile-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(124,58,237,.14);
+      border: 1px solid rgba(139,92,246,.28);
+      color: #a78bfa;
+      font-size: 21px;
+    }
+
+    .account-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .account-id {
+      margin-top: 5px;
+      color: #858590;
+      font-size: 12px;
+    }
+
+    .account-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-box {
+      background: #0d0d12;
+      border: 1px solid #1d1d25;
+      border-radius: 13px;
+      padding: 13px;
+    }
+
+    .info-label {
+      color: #777783;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 6px;
+    }
+
+    .info-value {
+      font-size: 13px;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .status-active {
+      color: #a78bfa;
+    }
+
+    .status-blocked,
+    .status-suspended {
+      color: #f87171;
+    }
+
+    /* SECTIONS */
+    .section {
+      margin-top: 19px;
+    }
+
+    .section-title {
+      color: #777783;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 5px 9px;
+    }
+
+    .menu-card {
+      overflow: hidden;
+      background: #0c0c11;
+      border: 1px solid #1c1c24;
+      border-radius: 17px;
+    }
+
+    .menu-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #f2f2f5;
+      min-height: 66px;
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      text-align: left;
+      cursor: pointer;
+      text-decoration: none;
+      border-bottom: 1px solid #19191f;
+      font-family: inherit;
+    }
+
+    .menu-item:last-child {
+      border-bottom: 0;
+    }
+
+    .menu-item:active {
+      background: #111117;
+    }
+
+    .menu-icon {
+      width: 39px;
+      height: 39px;
+      min-width: 39px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(124,58,237,.12);
+      color: #a78bfa;
+      font-size: 15px;
+    }
+
+    .menu-content {
+      flex: 1;
+    }
+
+    .menu-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .menu-description {
+      margin-top: 4px;
+      color: #73737e;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .menu-arrow {
+      color: #555560;
+      font-size: 12px;
+    }
+
+    /* TELEGRAM */
+    .telegram .menu-icon {
+      background: rgba(56,189,248,.10);
+      color: #38bdf8;
+    }
+
+    /* DECONNEXION */
+    .logout-card {
+      margin-top: 19px;
+      background: #0c0c11;
+      border: 1px solid rgba(248,113,113,.18);
+      border-radius: 17px;
+      overflow: hidden;
+    }
+
+    .logout-button {
+      width: 100%;
+      min-height: 62px;
+      border: 0;
+      background: transparent;
+      color: #f87171;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 13px 15px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+    }
+
+    .logout-icon {
+      width: 39px;
+      height: 39px;
+      border-radius: 12px;
+      background: rgba(248,113,113,.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logout-text {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    /* MESSAGE */
+    .message {
+      display: none;
+      margin: 14px 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .message.error {
+      display: block;
+      color: #fca5a5;
+      background: rgba(127,29,29,.18);
+      border: 1px solid rgba(248,113,113,.20);
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed;
+      z-index: 100;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      width: calc(100% - 24px);
+      max-width: 590px;
+      height: 66px;
+      padding: 7px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: rgba(12,12,17,.96);
+      backdrop-filter: blur(18px);
+      border: 1px solid #24242d;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.45);
+    }
+
+    .nav-item {
+      text-decoration: none;
+      color: #686873;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border-radius: 14px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+    }
+
+    .nav-item.active {
+      color: #a78bfa;
+      background: rgba(124,58,237,.10);
+    }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 35px 15px;
+      color: #777783;
+      font-size: 12px;
+    }
+
+    @media (max-width: 390px) {
+      .account-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        padding-left: 13px;
+        padding-right: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <header class="header">
+      <div class="brand">
+        <img src="logo.png" alt="OSMO">
+        <div>
+          <div class="brand-title">OSMO</div>
+          <div class="brand-subtitle">Espace personnel</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-title">
+      <h1>Mon profil</h1>
+      <p>Gérez votre compte et vos accès OSMO.</p>
+    </section>
+
+    <div id="message" class="message"></div>
+
+    <section id="profileContent">
+      <div class="loading">
+        Chargement de votre profil...
+      </div>
+    </section>
+
+    <!-- COMPTE -->
+    <div class="section">
+      <div class="section-title">Compte</div>
+
+      <div class="menu-card">
+
+        <a class="menu-item" href="transactions.html">
+          <div class="menu-icon">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+
+          <div class="menu-content">
+            <div class="menu-title">Transactions</div>
+            <div class="menu-description">
+              Consultez l'historique de vos opérations.
+            </div>
+          </div>
+
+          <i class="fa-solid fa-chevron-right menu-arrow"></i>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- SÉCURITÉ -->
+    <div class="section">
+      <div class="section-title">Sécurité</div>
+
+      <div class="menu-card">
+
+        <a class="menu-item" href="mot-de-passe.html">
+          <div class="menu-icon">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+
+          <div class="menu-content">
+            <div class="menu-title">Modifier le mot de passe</div>
+            <div class="menu-description">
+              Changez le mot de passe de connexion.
+            </div>
+          </div>
+
+          <i class="fa-solid fa-chevron-right menu-arrow"></i>
+        </a>
+
+        <a class="menu-item" href="compte-retrait.html">
+          <div class="menu-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+
+          <div class="menu-content">
+            <div class="menu-title">Compte de retrait</div>
+            <div class="menu-description">
+              Gérez votre compte WAVE et votre mot de passe de transaction.
+            </div>
+          </div>
+
+          <i class="fa-solid fa-chevron-right menu-arrow"></i>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- COMMUNAUTÉ -->
+    <div class="section">
+      <div class="section-title">Communauté</div>
+
+      <div class="menu-card">
+
+        <a class="menu-item telegram"
+           href="https://t.me/osmoce"
+           target="_blank"
+           rel="noopener noreferrer">
+
+          <div class="menu-icon">
+            <i class="fa-brands fa-telegram"></i>
+          </div>
+
+          <div class="menu-content">
+            <div class="menu-title">Canal Telegram</div>
+            <div class="menu-description">
+              Suivez les informations officielles d'OSMO.
+            </div>
+          </div>
+
+          <i class="fa-solid fa-arrow-up-right-from-square menu-arrow"></i>
+        </a>
+
+        <a class="menu-item telegram"
+           href="https://t.me/+dbvFnIOzTbQwZTRk"
+           target="_blank"
+           rel="noopener noreferrer">
+
+          <div class="menu-icon">
+            <i class="fa-solid fa-users"></i>
+          </div>
+
+          <div class="menu-content">
+            <div class="menu-title">Groupe Telegram</div>
+            <div class="menu-description">
+              Rejoignez la communauté OSMO.
+            </div>
+          </div>
+
+          <i class="fa-solid fa-arrow-up-right-from-square menu-arrow"></i>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- DÉCONNEXION -->
+    <div class="logout-card">
+      <button class="logout-button" id="logoutButton">
+        <div class="logout-icon">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+
+        <div class="logout-text">
+          Déconnexion
+        </div>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- MENU BAS -->
+  <nav class="bottom-nav">
+
+    <a href="dashboard.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>ACCUEIL</span>
+    </a>
+
+    <a href="produits.html" class="nav-item">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>PRODUIT</span>
+    </a>
+
+    <a href="equipe.html" class="nav-item">
+      <i class="fa-solid fa-users"></i>
+      <span>ÉQUIPE</span>
+    </a>
+
+    <a href="compte.html" class="nav-item active">
+      <i class="fa-solid fa-user"></i>
+      <span>PROFIL</span>
+    </a>
+
+  </nav>
+
+  <script>
+    const SUPABASE_URL =
+      "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const sessionToken =
+      localStorage.getItem("osmo_session_token");
+
+    if (!sessionToken) {
+      window.location.href = "connexion.html";
+    }
+
+    const profileContent =
+      document.getElementById("profileContent");
+
+    const message =
+      document.getElementById("message");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showError(text) {
+      message.textContent = text;
+      message.className = "message error";
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("fr-FR").format(
+        Number(value || 0)
+      ) + " XOF";
+    }
+
+    function statusLabel(status) {
+      if (status === "active") return "Actif";
+      if (status === "blocked") return "Bloqué";
+      if (status === "suspended") return "Suspendu";
+      return status || "—";
+    }
+
+    function statusClass(status) {
+      if (status === "active") return "status-active";
+      if (status === "blocked") return "status-blocked";
+      if (status === "suspended") return "status-suspended";
+      return "";
+    }
+
+    async function loadProfile() {
+
+      try {
+
+        const { data, error } =
+          await supabaseClient.rpc(
+            "user_dashboard",
+            {
+              p_session_token: sessionToken
+            }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data || !data.user) {
+          throw new Error("SESSION_INVALIDE");
+        }
+
+        const user = data.user;
+
+        profileContent.innerHTML = `
+          <section class="account-card">
+
+            <div class="account-top">
+
+              <div class="profile-icon">
+                <i class="fa-solid fa-user"></i>
+              </div>
+
+              <div>
+                <div class="account-name">
+                  Mon compte OSMO
+                </div>
+
+                <div class="account-id">
+                  ID : ${escapeHtml(user.professional_id)}
+                </div>
+              </div>
+
+            </div>
+
+            <div class="account-grid">
+
+              <div class="info-box">
+                <div class="info-label">
+                  Identifiant professionnel
+                </div>
+
+                <div class="info-value">
+                  ${escapeHtml(user.professional_id)}
+                </div>
+              </div>
+
+              <div class="info-box">
+                <div class="info-label">
+                  Téléphone
+                </div>
+
+                <div class="info-value">
+                  +225 ${escapeHtml(user.phone)}
+                </div>
+              </div>
+
+              <div class="info-box">
+                <div class="info-label">
+                  Statut
+                </div>
+
+                <div class="info-value ${statusClass(user.status)}">
+                  ${escapeHtml(statusLabel(user.status))}
+                </div>
+              </div>
+
+              <div class="info-box">
+                <div class="info-label">
+                  Solde
+                </div>
+
+                <div class="info-value">
+                  ${formatMoney(user.balance)}
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+        `;
+
+      } catch (error) {
+
+        console.error(error);
+
+        profileContent.innerHTML = "";
+
+        showError(
+          "Impossible de charger votre profil. Veuillez vous reconnecter."
+        );
+
+        localStorage.removeItem("osmo_session_token");
+        localStorage.removeItem("osmo_user_id");
+        localStorage.removeItem("osmo_professional_id");
+        localStorage.removeItem("osmo_phone");
+
+        setTimeout(() => {
+          window.location.href = "connexion.html";
+        }, 1500);
+      }
+    }
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener("click", async () => {
+
+        const button =
+          document.getElementById("logoutButton");
+
+        button.disabled = true;
+
+        try {
+
+          await supabaseClient.rpc(
+            "logout_user",
+            {
+              p_session_token: sessionToken
+            }
+          );
+
+        } catch (error) {
+          console.error(error);
+        }
+
+        localStorage.removeItem("osmo_session_token");
+        localStorage.removeItem("osmo_user_id");
+        localStorage.removeItem("osmo_professional_id");
+        localStorage.removeItem("osmo_phone");
+
+        window.location.href = "connexion.html";
+      });
+
+    loadProfile();
+  </script>
+
+</body>
+</html>
