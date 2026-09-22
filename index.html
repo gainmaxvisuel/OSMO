@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>OSMO — Inscription</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --black: #050507;
+      --black-soft: #0b0b10;
+      --card: #101016;
+      --card-2: #15151d;
+      --border: rgba(255,255,255,.08);
+      --purple: #8b5cf6;
+      --purple-dark: #6d28d9;
+      --purple-light: #a78bfa;
+      --white: #ffffff;
+      --muted: #92929d;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--black);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(139,92,246,.20), transparent 35%),
+        radial-gradient(circle at 100% 70%, rgba(109,40,217,.08), transparent 30%),
+        var(--black);
+      color: var(--white);
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 520px;
+      min-height: 100vh;
+      padding: 28px 20px 32px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BRAND */
+
+    .brand {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .logo-frame {
+      width: 82px;
+      height: 82px;
+      padding: 7px;
+      border-radius: 24px;
+      background:
+        linear-gradient(145deg, rgba(167,139,250,.18), rgba(139,92,246,.04));
+      border: 1px solid rgba(139,92,246,.35);
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,.04),
+        0 16px 45px rgba(0,0,0,.45),
+        0 0 35px rgba(139,92,246,.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 17px;
+      display: block;
+    }
+
+    /* HEADER */
+
+    .heading {
+      margin-bottom: 24px;
+    }
+
+    .heading h1 {
+      font-size: 28px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.7px;
+      text-align: center;
+    }
+
+    /* CARD */
+
+    .form-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.008)),
+        var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow:
+        0 24px 70px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,255,255,.025);
+    }
+
+    /* FORM */
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #d4d4dc;
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input {
+      width: 100%;
+      height: 54px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 14px;
+      background: var(--card-2);
+      color: var(--white);
+      outline: none;
+      padding: 0 15px;
+      font-family: inherit;
+      font-size: 15px;
+      transition: .2s ease;
+    }
+
+    .input::placeholder {
+      color: #62626d;
+    }
+
+    .input:focus {
+      border-color: rgba(139,92,246,.75);
+      box-shadow: 0 0 0 3px rgba(139,92,246,.10);
+      background: #17171f;
+    }
+
+    /* PHONE */
+
+    .phone-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    .country {
+      height: 54px;
+      min-width: 72px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: var(--card-2);
+      color: #d9d9e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .phone-input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* PASSWORD */
+
+    .password-input {
+      padding-right: 52px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border: 0;
+      background: transparent;
+      color: #777783;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+
+    .toggle-password:hover {
+      color: var(--purple-light);
+      background: rgba(139,92,246,.08);
+    }
+
+    .toggle-password svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    /* REFERRAL */
+
+    .referral {
+      position: relative;
+    }
+
+    .referral.active .input {
+      border-color: rgba(139,92,246,.5);
+      background: rgba(139,92,246,.06);
+    }
+
+    .referral-note {
+      display: none;
+      margin-top: 7px;
+      font-size: 11px;
+      color: var(--purple-light);
+    }
+
+    .referral.active .referral-note {
+      display: block;
+    }
+
+    /* BUTTON */
+
+    .submit-btn {
+      width: 100%;
+      height: 56px;
+      margin-top: 5px;
+      border: 0;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--purple-light), var(--purple-dark));
+      color: white;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow:
+        0 12px 28px rgba(109,40,217,.25),
+        inset 0 1px 0 rgba(255,255,255,.20);
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 16px 34px rgba(109,40,217,.32),
+        inset 0 1px 0 rgba(255,255,255,.20);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* MESSAGE */
+
+    .message {
+      display: none;
+      margin-top: 15px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .message.error {
+      display: block;
+      color: #fca5a5;
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.16);
+    }
+
+    .message.success {
+      display: block;
+      color: #86efac;
+      background: rgba(34,197,94,.08);
+      border: 1px solid rgba(34,197,94,.16);
+    }
+
+    /* LOGIN */
+
+    .login-link {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .login-link a {
+      color: var(--purple-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* FOOTER */
+
+    .footer {
+      margin-top: auto;
+      padding-top: 28px;
+      text-align: center;
+      color: #555560;
+      font-size: 11px;
+    }
+
+    /* LOADER */
+
+    .loader {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,.25);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 380px) {
+      .page {
+        padding: 22px 15px 28px;
+      }
+
+      .form-card {
+        padding: 18px;
+        border-radius: 20px;
+      }
+
+      .logo-frame {
+        width: 74px;
+        height: 74px;
+      }
+
+      .heading h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <!-- LOGO -->
+    <div class="brand">
+      <div class="logo-frame">
+        <img src="logo.png" alt="OSMO">
+      </div>
+    </div>
+
+    <!-- TITLE -->
+    <div class="heading">
+      <h1>Créer un compte</h1>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card">
+
+      <form id="registerForm">
+
+        <!-- PHONE -->
+        <div class="field">
+          <label for="phone">Numéro de téléphone</label>
+
+          <div class="phone-wrap">
+            <div class="country">+225</div>
+
+            <input
+              id="phone"
+              class="input phone-input"
+              type="tel"
+              inputmode="numeric"
+              autocomplete="tel"
+              maxlength="10"
+              placeholder="10 chiffres"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="field">
+          <label for="password">Mot de passe</label>
+
+          <div class="input-wrap">
+            <input
+              id="password"
+              class="input password-input"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Votre mot de passe"
+              minlength="6"
+              required
+            >
+
+            <button
+              type="button"
+              class="toggle-password"
+              data-target="password"
+              aria-label="Afficher le mot de passe"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>
+                <circle cx="12" cy="12" r="2.5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="field">
+          <label for="confirmPassword">Confirmer le mot de passe</label>
+
+          <div class="input-wrap">
+            <input
+              id="confirmPassword"
+              class="input password-input"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Confirmez votre mot de passe"
+              minlength="6"
+              required
+            >
+
+            <button
+              type="button"
+              class="toggle-password"
+              data-target="confirmPassword"
+              aria-label="Afficher le mot de passe"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/>
+                <circle cx="12" cy="12" r="2.5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- REFERRAL -->
+        <div class="field referral" id="referralBox">
+          <label for="referralCode">Code de parrainage <span style="color:#666670;">(facultatif)</span></label>
+
+          <input
+            id="referralCode"
+            class="input"
+            type="text"
+            autocomplete="off"
+            placeholder="Code de parrainage"
+            maxlength="30"
+          >
+
+          <div class="referral-note">
+            Code de parrainage détecté depuis votre lien.
+          </div>
+        </div>
+
+        <!-- SUBMIT -->
+        <button id="submitBtn" class="submit-btn" type="submit">
+          Créer mon compte
+        </button>
+
+        <div id="message" class="message"></div>
+
+      </form>
+
+      <div class="login-link">
+        Vous avez déjà un compte ?
+        <a href="connexion.html">Se connecter</a>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      OSMO
+    </div>
+
+  </main>
+
+  <script>
+    const SUPABASE_URL =
+      "https://ubzcivowwhglvzpyeueg.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_oPjQfIoZzfv1LuLAfsua4g_97K_tXSO";
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+    const form = document.getElementById("registerForm");
+    const phoneInput = document.getElementById("phone");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirmPassword");
+    const referralInput = document.getElementById("referralCode");
+    const referralBox = document.getElementById("referralBox");
+    const submitBtn = document.getElementById("submitBtn");
+    const message = document.getElementById("message");
+
+    /* --------------------------------
+       NUMÉRO : CHIFFRES UNIQUEMENT
+    -------------------------------- */
+
+    phoneInput.addEventListener("input", () => {
+      phoneInput.value =
+        phoneInput.value.replace(/\D/g, "").slice(0, 10);
+    });
+
+    /* --------------------------------
+       PARRAINAGE URL
+       ?ref=CODE
+    -------------------------------- */
+
+    const params = new URLSearchParams(window.location.search);
+    const referralFromUrl = params.get("ref");
+
+    if (referralFromUrl) {
+      referralInput.value =
+        referralFromUrl.trim().toUpperCase();
+
+      referralBox.classList.add("active");
+    }
+
+    /* --------------------------------
+       AFFICHER / MASQUER MOT DE PASSE
+    -------------------------------- */
+
+    document.querySelectorAll(".toggle-password").forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const target =
+          document.getElementById(button.dataset.target);
+
+        if (target.type === "password") {
+          target.type = "text";
+        } else {
+          target.type = "password";
+        }
+
+      });
+
+    });
+
+    /* --------------------------------
+       MESSAGE
+    -------------------------------- */
+
+    function showMessage(text, type) {
+      message.className = "message " + type;
+      message.textContent = text;
+    }
+
+    function clearMessage() {
+      message.className = "message";
+      message.textContent = "";
+    }
+
+    /* --------------------------------
+       INSCRIPTION
+       RPC EXISTANTE
+    -------------------------------- */
+
+    form.addEventListener("submit", async (event) => {
+
+      event.preventDefault();
+      clearMessage();
+
+      const phone =
+        phoneInput.value.trim();
+
+      const password =
+        passwordInput.value;
+
+      const confirmPassword =
+        confirmPasswordInput.value;
+
+      const referralCode =
+        referralInput.value.trim() || null;
+
+      /* Vérification téléphone */
+
+      if (!/^\d{10}$/.test(phone)) {
+        showMessage(
+          "Le numéro doit contenir exactement 10 chiffres.",
+          "error"
+        );
+        phoneInput.focus();
+        return;
+      }
+
+      /* Vérification mot de passe */
+
+      if (password.length < 6) {
+        showMessage(
+          "Le mot de passe doit contenir au moins 6 caractères.",
+          "error"
+        );
+        passwordInput.focus();
+        return;
+      }
+
+      /* Confirmation */
+
+      if (password !== confirmPassword) {
+        showMessage(
+          "Les deux mots de passe ne correspondent pas.",
+          "error"
+        );
+        confirmPasswordInput.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+
+      submitBtn.innerHTML =
+        '<span class="loader"></span>Création du compte...';
+
+      try {
+
+        /*
+         * La logique de sécurité reste dans Supabase.
+         * register_user_secure() gère :
+         * - validation du téléphone
+         * - vérification du parrainage
+         * - hash du mot de passe
+         * - création du compte
+         * - bonus d'inscription
+         * - transaction correspondante
+         */
+
+        const { data, error } =
+          await supabaseClient.rpc(
+            "register_user_secure",
+            {
+              p_phone: phone,
+              p_password: password,
+              p_referral_code: referralCode
+            }
+          );
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data) {
+          throw new Error("INSCRIPTION_ECHOUEE");
+        }
+
+        showMessage(
+          "Votre compte a été créé avec succès.",
+          "success"
+        );
+
+        /*
+         * Petite pause pour laisser voir
+         * le message de succès.
+         */
+
+        setTimeout(() => {
+          window.location.href = "connexion.html";
+        }, 1000);
+
+      } catch (error) {
+
+        console.error(error);
+
+        let text =
+          "Impossible de créer le compte. Veuillez réessayer.";
+
+        const raw =
+          String(error?.message || "").toUpperCase();
+
+        if (raw.includes("TELEPHONE_INVALIDE")) {
+          text = "Le numéro doit contenir exactement 10 chiffres.";
+        }
+        else if (raw.includes("TELEPHONE_DEJA_UTILISE")) {
+          text = "Ce numéro est déjà utilisé.";
+        }
+        else if (raw.includes("CODE_PARRAINAGE_INVALIDE")) {
+          text = "Le code de parrainage est invalide.";
+        }
+        else if (raw.includes("MOT_DE_PASSE_TROP_COURT")) {
+          text = "Le mot de passe doit contenir au moins 6 caractères.";
+        }
+
+        showMessage(text, "error");
+
+      } finally {
+
+        submitBtn.disabled = false;
+
+        submitBtn.textContent =
+          "Créer mon compte";
+      }
+
+    });
+  </script>
+
+</body>
+            </html>
